@@ -143,6 +143,10 @@ namespace Conventions.MFiles.Models
         [DefaultValue("")]
         public String Value { get; set; }
 
+        public int? ParentId { get; set; }
+
+        [ForeignKey("ParentId")]
+        
         public StringValue Parent { get; set; }
     }
 

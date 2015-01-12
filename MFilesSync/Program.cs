@@ -30,13 +30,23 @@ namespace MFilesSync
 
             testDocument.Titles.Add(title);
             testDocument.Descriptions.Add(descr);
+
+
+            var chemical = new ChemicalValue {Language = "en", Value = "Default value"};
+
+            var chemicalEs = new ChemicalValue {Language = "es", Value = "Spanish name", Parent = chemical};
+
+            testDocument.Chemicals.Add(chemical);
+            testDocument.Chemicals.Add(chemicalEs);
+
+
             
             ctx.Documents.Add(testDocument);
             try
             {
                 ctx.SaveChanges();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 foreach (var e in ctx.GetValidationErrors())
                 {
@@ -47,8 +57,8 @@ namespace MFilesSync
                         Console.WriteLine(e1.PropertyName+" "+e1.ErrorMessage);
                     }
                 }
+                throw ex;
             }
-
 
         }
     }
