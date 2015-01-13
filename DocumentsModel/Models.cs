@@ -16,11 +16,35 @@ namespace Conventions.MFiles.Models
         }
 
         public DbSet<Document> Documents { get; set; }
-        public DbSet<StringValue> Values { get; set; }
+        public DbSet<ListProperty> Values { get; set; }
+
+        public DbSet<MFilesDocument> MFilesDocuments { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+           modelBuilder.Entity<SingleProperty>()
+               .Map<TitleValue>(m => m.Requires("Discriminator").HasValue("Title"))
+               .Map<DescriptionValue>(m => m.Requires("Discriminator").HasValue("Description"));
+           
+        
         }
+    }
+
+    public class MFilesDocument
+    {
+        [Key]
+        public Guid MFilesDocumentGuid { get; set; }
+
+        [Required]
+        public DateTime CreatedDate { get; set; }
+
+        [Required]
+        public DateTime ModifiedDate { get; set; }
+
+        public virtual ICollection<Document> Documents { get; set; }
+
+        public virtual ICollection<TitleValue> Titles { get; set; } 
+        public virtual ICollection<DescriptionValue> Descriptions { get; set; } 
     }
 
     public class Document
@@ -67,25 +91,9 @@ namespace Conventions.MFiles.Models
         [DefaultValue("")]
         public String Country { get; set; }
 
-        [Required]
-        public DateTime CreatedDate { get; set; }
 
-        [Required]
-        public DateTime ModifiedDate { get; set; }
-
-        private DateTime? _publicationDate;
-        public DateTime PublicationDate
-        {
-            get { return _publicationDate.HasValue? _publicationDate.Value:CreatedDate;}
-            set { _publicationDate = value; }
-        }
-
-        private DateTime? _publicationUpdateDate;
-        public DateTime PublicationUpdateDate
-        {
-            get { return _publicationUpdateDate.HasValue ? _publicationUpdateDate.Value : ModifiedDate; }
-            set { _publicationUpdateDate = value; }
-        }
+        public DateTime PublicationDate { get; set; }
+        public DateTime PublicationUpdateDate { get; set; }
 
 
         public DateTime? PeriodStartDate { get; set; }
@@ -101,6 +109,9 @@ namespace Conventions.MFiles.Models
         public virtual ICollection<TypeValue> Types { get; set; }
 
         public virtual ICollection<File> Files { get; set; }
+
+        [InverseProperty("Documents")]
+        public virtual MFilesDocument InternalDocument { get; set; }
     }
 
 
@@ -129,11 +140,32 @@ namespace Conventions.MFiles.Models
         public Document Document { get; set; }
     }
 
-    public class StringValue
+    public abstract class SingleProperty
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int StringValueId { get; set; }
+        public int SinglePropertyId { get; set; }
+
+        [Required]
+        public int DocumentId { get; set; }
+
+        [Required]
+        public Guid MFilesDocumentGuid { get; set; }
+
+        [Required]
+        [StringLength(3)]
+        public String Language { get; set; }
+
+        [Required(AllowEmptyStrings = true)]
+        [DefaultValue("")]
+        public String Value { get; set; }
+    }
+
+    public abstract class ListProperty
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ListPropertyId { get; set; }
 
         [Required]
         [StringLength(3)]
@@ -146,37 +178,51 @@ namespace Conventions.MFiles.Models
         public int? ParentId { get; set; }
 
         [ForeignKey("ParentId")]
-        
-        public StringValue Parent { get; set; }
+        public ListProperty Parent { get; set; }
     }
 
-    public class TitleValue : StringValue
+    public class TitleValue : SingleProperty
+    {
+        [ForeignKey("DocumentId")]
+        [InverseProperty("Titles")]
+        public Document Document { get; set; }
+
+        [ForeignKey("MFilesDocumentGuid")]
+        [InverseProperty("Titles")]
+        public MFilesDocument MFilesDocument { get; set; }
+    }
+
+
+    public class DescriptionValue : SingleProperty
+    {
+        [ForeignKey("DocumentId")]
+        [InverseProperty("Descriptions")]
+        public Document Document { get; set; }
+
+        [ForeignKey("MFilesDocumentGuid")]
+        [InverseProperty("Descriptions")]
+        public MFilesDocument MFilesDocument { get; set; }
+    }
+    
+
+
+    public class ChemicalValue : ListProperty
     {
         public virtual ICollection<Document> Documents { get; set; }
     }
 
-    public class DescriptionValue : StringValue
-    {
-        public virtual ICollection<Document> Documents { get; set; }
-    }
-
-    public class ChemicalValue : StringValue
-    {
-        public virtual ICollection<Document> Documents { get; set; }
-    }
-
-    public class ProgramValue : StringValue
+    public class ProgramValue : ListProperty
     {
         public virtual ICollection<Document> Documents { get; set; }
     }
 
 
-    public class TermValue : StringValue
+    public class TermValue : ListProperty
     {
         public virtual ICollection<Document> Documents { get; set; }
     }
 
-    public class TypeValue : StringValue
+    public class TypeValue : ListProperty
     {
         public virtual ICollection<Document> Documents { get; set; }
     }

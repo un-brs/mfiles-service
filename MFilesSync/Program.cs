@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
+using Conventions.MFiles.Models;
 using MFilesAPI;
 using MFilesSync.Properties;
 using NLog;
-using NLog.Fluent;
 
 namespace MFilesSync
 {
@@ -18,74 +20,33 @@ namespace MFilesSync
             MFServerConnection conn = server.Connect(MFAuthType.MFAuthTypeSpecificMFilesUser,
                 ConfigurationManager.AppSettings["MFilesUser"],
                 ConfigurationManager.AppSettings["MFilesPassword"],
-                NetworkAddress:ConfigurationManager.AppSettings["MFilesHost"]);
+                NetworkAddress: ConfigurationManager.AppSettings["MFilesHost"]);
+
+            var ctx = new DocumentsContext();
+            ctx.Database.CreateIfNotExists();
+            ctx.Database.Connection.Open();
 
             foreach (string vaultName in Settings.Default.Vaults)
             {
                 VaultOnServer svault = server.GetVaults().GetVaultByName(vaultName);
                 Vault vault = svault.LogIn();
 
-                ProcessVault(vaultName, vault, Settings.Default.View, Settings.Default.StartDate);
+                ProcessVault(ctx, vaultName, vault, Settings.Default.View, Settings.Default.StartDate);
             }
 
 
-            /*var ctx = new DocumentsContext();
-            ctx.Database.CreateIfNotExists();
-            ctx.Database.Connection.Open();
-
-            var testDocument = ctx.Documents.Create();
-            testDocument.UnNumber = "Hello";
-            testDocument.Vault = "My Vault";
             
-            testDocument.CreatedDate = DateTime.Now;
-            testDocument.ModifiedDate = DateTime.Now;
-
-            var title = new TitleValue {Language = "en", Value = "Test"};
-
-
-            var descr = new DescriptionValue {Language = "en", Value = "Test"};
-
-            testDocument.Titles.Add(title);
-            testDocument.Descriptions.Add(descr);
-
-
-            var chemical = new ChemicalValue {Language = "en", Value = "Default value"};
-
-            var chemicalEs = new ChemicalValue {Language = "es", Value = "Spanish name", Parent = chemical};
-
-            testDocument.Chemicals.Add(chemical);
-            testDocument.Chemicals.Add(chemicalEs);
-
-
-            
-            ctx.Documents.Add(testDocument);
-            try
-            {
-                ctx.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                foreach (var e in ctx.GetValidationErrors())
-                {
-                    foreach (var e1 in e.ValidationErrors)
-                    {
-
-
-                        Console.WriteLine(e1.PropertyName+" "+e1.ErrorMessage);
-                    }
-                }
-                throw ex;
-            }*/
+         
         }
 
-        private static void ProcessVault(string vaultName, Vault vault, string viewName, DateTime startDate)
+        private static void ProcessVault(DocumentsContext ctx, string vaultName, Vault vault, string viewName, DateTime startDate)
         {
             logger.Info(string.Format("Process vault {0}", vaultName));
             foreach (IView view in vault.ViewOperations.GetViews())
             {
                 if (view.Name == viewName)
                 {
-                    ProcessView(vault, viewName, view, startDate);
+                    ProcessView(ctx, vaultName, vault, viewName, view, startDate);
                     return;
                 }
             }
@@ -93,7 +54,7 @@ namespace MFilesSync
             logger.Error(String.Format("Could not find view {0}", viewName));
         }
 
-        private static void ProcessView(Vault vault, string viewName, IView view, DateTime startDate)
+        private static void ProcessView(DocumentsContext ctx, string vaultName, Vault vault, string viewName, IView view, DateTime startDate)
         {
             logger.Info(string.Format("Process view {0}", viewName));
 
@@ -123,6 +84,9 @@ namespace MFilesSync
 
             DateTime currentDateTime = startDate;
 
+            var internalDocuments = new List<MFilesInternalDocument>();
+            var internalVault = new MFilesVault(vaultName, vault);
+
             while (currentDateTime < DateTime.Now)
             {
                 conditions[conditions.Count - 1].TypedValue.SetValue(MFDataType.MFDatatypeDate, currentDateTime);
@@ -133,18 +97,22 @@ namespace MFilesSync
                 ObjectSearchResults objects = vault.ObjectSearchOperations.SearchForObjectsByConditionsEx(conditions,
                     MFSearchFlags.MFSearchFlagReturnLatestVisibleVersion, false, 0);
 
-                foreach (ObjectVersion obj in objects)
-                {
-                    logger.Info(obj.Title + " " + obj.LastModifiedUtc.ToShortDateString() + " " + obj.ObjectGUID);
-                }
+                internalDocuments.AddRange(from ObjectVersion obj in objects select new MFilesInternalDocument(internalVault, obj));
+            }
+
+            var dict = internalDocuments.GroupBy(w => w.UnNumber).ToDictionary(g => g.Key, g => g.ToList());
+            foreach (var unNumber in dict)
+            {
+                var internalDocument = unNumber.Value.FirstOrDefault(d => d.File.Extension == "pdf") ??
+                                       unNumber.Value[0];
+                ProcessMainDocument(ctx, internalDocument);
             }
         }
 
-        private enum LogSeverity
+        private static void ProcessMainDocument(DocumentsContext ctx, MFilesInternalDocument internalDocument)
         {
-            Info = 0,
-            Warning = 1,
-            Error = 2
+            var doc = ctx.Documents.Create();
+            doc.InternalDocument = internalDocument.MFilesDocument;
         }
     }
 }
