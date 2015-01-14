@@ -72,6 +72,7 @@ namespace MFilesSync
         private readonly Guid _versionGuid;
         private string _unNumber;
         private string _language;
+        private string _vaultName;
         private readonly DateTime _modifiedDate;
         private readonly DateTime _createdDate;
         private ObjectFile _file;
@@ -105,6 +106,11 @@ namespace MFilesSync
             get { return _language; }
         }
 
+        public string VaultName
+        {
+            get { return _vaultName; }
+        }
+
         public DateTime ModifiedDate
         {
             get { return _modifiedDate; }
@@ -126,14 +132,14 @@ namespace MFilesSync
 
             _objectGuid = Guid.Parse(objectVersion.ObjectGUID);
             _versionGuid = Guid.Parse(objectVersion.VersionGUID);
-
+            _vaultName = vault.Name;
             // Fill mandatory fields
             _unNumber = GetStringValue("UN-number");
             _language = GetStringValue("Language");
             // ReSharper disable once PossibleInvalidOperationException
             _modifiedDate = GetDateTimeValue("Last modified").Value;
             // ReSharper disable once PossibleInvalidOperationException
-            _createdDate = GetDateTimeValue("CreatedDate").Value;
+            _createdDate = GetDateTimeValue("Created").Value;
 
             _file = _vault.GetObjectFile(_objectVersion.ObjVer);
 

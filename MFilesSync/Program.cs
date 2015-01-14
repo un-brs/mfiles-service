@@ -35,11 +35,12 @@ namespace MFilesSync
             }
 
 
-            
-         
+
+
         }
 
-        private static void ProcessVault(DocumentsContext ctx, string vaultName, Vault vault, string viewName, DateTime startDate)
+        private static void ProcessVault(DocumentsContext ctx, string vaultName, Vault vault, string viewName,
+            DateTime startDate)
         {
             logger.Info(string.Format("Process vault {0}", vaultName));
             foreach (IView view in vault.ViewOperations.GetViews())
@@ -54,7 +55,8 @@ namespace MFilesSync
             logger.Error(String.Format("Could not find view {0}", viewName));
         }
 
-        private static void ProcessView(DocumentsContext ctx, string vaultName, Vault vault, string viewName, IView view, DateTime startDate)
+        private static void ProcessView(DocumentsContext ctx, string vaultName, Vault vault, string viewName, IView view,
+            DateTime startDate)
         {
             logger.Info(string.Format("Process view {0}", viewName));
 
@@ -97,22 +99,75 @@ namespace MFilesSync
                 ObjectSearchResults objects = vault.ObjectSearchOperations.SearchForObjectsByConditionsEx(conditions,
                     MFSearchFlags.MFSearchFlagReturnLatestVisibleVersion, false, 0);
 
-                internalDocuments.AddRange(from ObjectVersion obj in objects select new MFilesInternalDocument(internalVault, obj));
+                internalDocuments.AddRange(from ObjectVersion obj in objects
+                    select new MFilesInternalDocument(internalVault, obj));
             }
 
             var dict = internalDocuments.GroupBy(w => w.UnNumber).ToDictionary(g => g.Key, g => g.ToList());
             foreach (var unNumber in dict)
             {
-                var internalDocument = unNumber.Value.FirstOrDefault(d => d.File.Extension == "pdf") ??
-                                       unNumber.Value[0];
-                ProcessMainDocument(ctx, internalDocument);
+                var internalDocument =
+                    unNumber.Value.FirstOrDefault(d => d.File.Extension == "pdf" && d.Language == "English") ??
+                    unNumber.Value[0];
+                var mainDocument = ProcessMainDocument(ctx, internalDocument);
+
+                foreach (var other in unNumber.Value.FindAll(d => d != internalDocument))
+                {
+                    ProcessDependantDocument(ctx, mainDocument, other);
+                }
+                ctx.Documents.Add(mainDocument);
+                ctx.SaveChanges();
+
             }
         }
 
-        private static void ProcessMainDocument(DocumentsContext ctx, MFilesInternalDocument internalDocument)
+        private static Document ProcessMainDocument(DocumentsContext ctx, MFilesInternalDocument internalDocument)
         {
             var doc = ctx.Documents.Create();
             doc.InternalDocument = internalDocument.MFilesDocument;
+            doc.PublicationDate = doc.InternalDocument.CreatedDate;
+            doc.PublicationUpdateDate = doc.InternalDocument.ModifiedDate;
+            doc.Vault = internalDocument.VaultName;
+            doc.UnNumber = internalDocument.UnNumber;
+
+            ProcessDependantDocument(ctx, doc, internalDocument);
+            return doc;
+        }
+
+        private static void ProcessDependantDocument(DocumentsContext ctx, Document doc,
+            MFilesInternalDocument internalDocument)
+        {
+            var title = new TitleValue();
+            var description = new DescriptionValue();
+            var file = new File();
+
+            title.Document = doc;
+            description.Document = doc;
+            file.Document = doc;
+
+
+            var mfilesDocument =
+                ctx.MFilesDocuments.FirstOrDefault(d => d.MFilesDocumentGuid == internalDocument.ObjectGuid) ??
+                internalDocument.MFilesDocument;
+
+            title.MFilesDocument = mfilesDocument;
+            description.MFilesDocument = mfilesDocument;
+            file.MFilesDocument = mfilesDocument;
+
+            title.Value = internalDocument.GetStringValue("Name or title");
+            description.Value = internalDocument.GetStringValue("Description");
+
+            title.Language = internalDocument.Language.Substring(0, 2);
+            description.Language = internalDocument.Language.Substring(0, 2);
+            file.Language = internalDocument.Language.Substring(0, 2);
+            file.Name = internalDocument.File.Title;
+            file.MimeType = internalDocument.File.Extension;
+            file.Size = internalDocument.File.LogicalSize;
+
+            doc.Titles.Add(title);
+            doc.Descriptions.Add(description);
+            doc.Files.Add(file);
+
         }
     }
 }

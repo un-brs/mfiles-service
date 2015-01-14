@@ -58,6 +58,7 @@ namespace Conventions.MFiles.Models
             Terms = new HashSet<TermValue>();
             Programs = new HashSet<ProgramValue>();
             Types = new HashSet<TypeValue>();
+            Files = new HashSet<File>();
         }
 
         [Key]
@@ -122,6 +123,9 @@ namespace Conventions.MFiles.Models
         public int FileId { get; set; }
 
         [Required]
+        public Document Document { get; set; }
+
+        [Required]
         [StringLength(3)]
         public String Language { get; set; }
 
@@ -134,10 +138,12 @@ namespace Conventions.MFiles.Models
         public String MimeType { get; set; }
 
         [Required]
-        public int Size { get; set; }
+        public long Size { get; set; }
 
         [Required]
-        public Document Document { get; set; }
+        public Guid MFilesDocumentGuid { get; set; }
+        [ForeignKey("MFilesDocumentGuid")]
+        public MFilesDocument MFilesDocument { get; set; }
     }
 
     public abstract class SingleProperty
@@ -150,15 +156,15 @@ namespace Conventions.MFiles.Models
         public int DocumentId { get; set; }
 
         [Required]
-        public Guid MFilesDocumentGuid { get; set; }
-
-        [Required]
         [StringLength(3)]
         public String Language { get; set; }
 
         [Required(AllowEmptyStrings = true)]
         [DefaultValue("")]
         public String Value { get; set; }
+
+        [Required]
+        public Guid MFilesDocumentGuid { get; set; }
     }
 
     public abstract class ListProperty
@@ -167,6 +173,12 @@ namespace Conventions.MFiles.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ListPropertyId { get; set; }
 
+
+        public int? ParentId { get; set; }
+        
+        [ForeignKey("ParentId")]
+        public ListProperty Parent { get; set; }
+
         [Required]
         [StringLength(3)]
         public String Language { get; set; }
@@ -175,10 +187,8 @@ namespace Conventions.MFiles.Models
         [DefaultValue("")]
         public String Value { get; set; }
 
-        public int? ParentId { get; set; }
 
-        [ForeignKey("ParentId")]
-        public ListProperty Parent { get; set; }
+       
     }
 
     public class TitleValue : SingleProperty
