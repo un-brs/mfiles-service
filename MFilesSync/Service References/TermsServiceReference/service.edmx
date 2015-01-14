@@ -1,0 +1,53 @@
+﻿<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0">
+    <Schema Namespace="asbMeetingModel" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <EntityType Name="Conferences">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="url" Type="Edm.String" Nullable="true" MaxLength="512" Unicode="true" FixedLength="false" />
+        <Property Name="title" Type="Edm.String" Nullable="true" MaxLength="300" Unicode="true" FixedLength="false" />
+        <Property Name="description" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="start" Type="Edm.DateTime" Nullable="true" />
+        <Property Name="end" Type="Edm.DateTime" Nullable="true" />
+        <Property Name="kind" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="type" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="access" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="status" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="imageUrl" Type="Edm.String" Nullable="true" MaxLength="512" Unicode="true" FixedLength="false" />
+        <Property Name="imageCopyright" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="location" Type="Edm.String" Nullable="true" MaxLength="350" Unicode="true" FixedLength="false" />
+        <Property Name="city" Type="Edm.String" Nullable="true" MaxLength="100" Unicode="true" FixedLength="false" />
+        <Property Name="country" Type="Edm.String" Nullable="true" MaxLength="2" Unicode="true" FixedLength="false" />
+        <Property Name="updated" Type="Edm.DateTime" Nullable="true" />
+        <Property Name="brs_country" Type="Edm.String" Nullable="true" MaxLength="250" Unicode="true" FixedLength="false" />
+        <Property Name="brs_unregion" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="brs_treaties" Type="Edm.String" Nullable="true" MaxLength="50" Unicode="false" FixedLength="false" />
+        <Property Name="brs_terms" Type="Edm.String" Nullable="true" MaxLength="800" Unicode="false" FixedLength="false" />
+        <Property Name="brs_SessionLanguage" Type="Edm.Int32" Nullable="true" />
+        <Property Name="brs_LinkRegistration" Type="Edm.String" Nullable="true" MaxLength="250" Unicode="true" FixedLength="false" />
+        <Property Name="brs_LinkFaq" Type="Edm.String" Nullable="true" MaxLength="250" Unicode="true" FixedLength="false" />
+        <Property Name="brs_LinkRecording" Type="Edm.String" Nullable="true" MaxLength="250" Unicode="true" FixedLength="false" />
+      </EntityType>
+      <EntityType Name="Terms">
+        <Key>
+          <PropertyRef Name="TermId" />
+        </Key>
+        <Property Name="TermId" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" Nullable="true" MaxLength="250" Unicode="true" FixedLength="false" />
+        <Property Name="Description" Type="Edm.String" Nullable="true" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="Synonyms" Type="Edm.String" Nullable="true" MaxLength="1000" Unicode="true" FixedLength="false" />
+        <Property Name="InformeaTerm" Type="Edm.String" Nullable="true" MaxLength="1000" Unicode="true" FixedLength="false" />
+        <Property Name="ParentTermNames" Type="Edm.String" Nullable="true" MaxLength="2000" Unicode="false" FixedLength="false" />
+        <Property Name="ParentTermIds" Type="Edm.String" Nullable="true" MaxLength="4000" Unicode="false" FixedLength="false" />
+      </EntityType>
+    </Schema>
+    <Schema Namespace="Meetings" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <EntityContainer Name="asbMeetingEntities" p7:LazyLoadingEnabled="true" m:IsDefaultEntityContainer="true" xmlns:p7="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <EntitySet Name="Conferences" EntityType="asbMeetingModel.Conferences" />
+        <EntitySet Name="Terms" EntityType="asbMeetingModel.Terms" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

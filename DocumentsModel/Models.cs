@@ -134,6 +134,10 @@ namespace Conventions.MFiles.Models
         public String Name { get; set; }
 
         [Required]
+        [StringLength(10)]
+        public String Extension { get; set; }
+
+        [Required]
         [StringLength(255)]
         public String MimeType { get; set; }
 
@@ -172,6 +176,8 @@ namespace Conventions.MFiles.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ListPropertyId { get; set; }
+
+        public Guid ExternalTermId { get; set; }
 
 
         public int? ParentId { get; set; }

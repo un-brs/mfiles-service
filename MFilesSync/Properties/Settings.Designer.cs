@@ -63,5 +63,17 @@ namespace MFilesSync.Properties {
                 this["StartDate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://informea.pops.int/Meetings2/asbMeetings.svc")]
+        public string TermsServiceUri {
+            get {
+                return ((string)(this["TermsServiceUri"]));
+            }
+            set {
+                this["TermsServiceUri"] = value;
+            }
+        }
     }
 }

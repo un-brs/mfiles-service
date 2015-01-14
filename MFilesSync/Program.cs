@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using Conventions.MFiles.Models;
 using MFilesAPI;
 using MFilesSync.Properties;
+using MimeSharp;
 using NLog;
 
 namespace MFilesSync
 {
     internal class Program
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly  Mime Mime = new Mime();
 
         private static void Main(string[] args)
         {
             var server = new MFilesServerApplication();
-            logger.Error(ConfigurationManager.AppSettings["MFilesHost"]);
+            Logger.Error(ConfigurationManager.AppSettings["MFilesHost"]);
             MFServerConnection conn = server.Connect(MFAuthType.MFAuthTypeSpecificMFilesUser,
                 ConfigurationManager.AppSettings["MFilesUser"],
                 ConfigurationManager.AppSettings["MFilesPassword"],
@@ -26,39 +29,74 @@ namespace MFilesSync
             ctx.Database.CreateIfNotExists();
             ctx.Database.Connection.Open();
 
+            ProcessTermsService(ctx, Settings.Default.TermsServiceUri);
+ 
             foreach (string vaultName in Settings.Default.Vaults)
             {
-                VaultOnServer svault = server.GetVaults().GetVaultByName(vaultName);
-                Vault vault = svault.LogIn();
+                var svault = server.GetVaults().GetVaultByName(vaultName);
+                var vault = svault.LogIn();
 
                 ProcessVault(ctx, vaultName, vault, Settings.Default.View, Settings.Default.StartDate);
             }
 
+            ctx.SaveChanges();
+        }
+
+        private static void ProcessTermsService(DocumentsContext ctx, string termsServiceUri)
+        {
+            var sctx = new TermsServiceReference.asbMeetingEntities(new Uri(termsServiceUri));
+            
+            var chemicalQuery = from term in sctx.Terms where term.ParentTermNames.Contains("Chemicals") select term;
+            foreach (var t in chemicalQuery)
+            {
+                var val = new ChemicalValue {Language = "en", Value = t.Name};
+                val.ExternalTermId = t.TermId;
+                ctx.Values.Add(val);
+            }
 
 
+            var programmesQuery = from term in sctx.Terms where term.ParentTermNames.Contains("Programmes") select term;
+            foreach (var t in programmesQuery)
+            {
+                var val = new ProgramValue { Language = "en", Value = t.Name };
+                val.ExternalTermId = t.TermId;
+                ctx.Values.Add(val);
+            }
+
+            var termsQuery = from term in sctx.Terms where term.ParentTermNames.Contains("Scientific and Technical Publications Terms") select term;
+            foreach (var t in termsQuery)
+            {
+                var val = new TermValue { Language = "en", Value = t.Name };
+                val.ExternalTermId = t.TermId;
+                ctx.Values.Add(val);
+            }
 
         }
 
         private static void ProcessVault(DocumentsContext ctx, string vaultName, Vault vault, string viewName,
             DateTime startDate)
         {
-            logger.Info(string.Format("Process vault {0}", vaultName));
+            Logger.Info(string.Format("Process vault {0}", vaultName));
+            var internalVault = new MFilesVault(vaultName, vault);
+
+            ProcessVaultAdditionalClasses(ctx, internalVault);
+
             foreach (IView view in vault.ViewOperations.GetViews())
             {
                 if (view.Name == viewName)
                 {
-                    ProcessView(ctx, vaultName, vault, viewName, view, startDate);
+                    ProcessView(ctx, internalVault, viewName, view, startDate);
                     return;
                 }
             }
 
-            logger.Error(String.Format("Could not find view {0}", viewName));
+            Logger.Error(String.Format("Could not find view {0}", viewName));
         }
 
-        private static void ProcessView(DocumentsContext ctx, string vaultName, Vault vault, string viewName, IView view,
+        private static void ProcessView(DocumentsContext ctx, MFilesVault internalVault, string viewName, IView view,
             DateTime startDate)
         {
-            logger.Info(string.Format("Process view {0}", viewName));
+            Logger.Info(string.Format("Process view {0}", viewName));
 
             SearchConditions conditions = view.SearchConditions;
             var dfDate = new DataFunctionCall();
@@ -87,7 +125,7 @@ namespace MFilesSync
             DateTime currentDateTime = startDate;
 
             var internalDocuments = new List<MFilesInternalDocument>();
-            var internalVault = new MFilesVault(vaultName, vault);
+
 
             while (currentDateTime < DateTime.Now)
             {
@@ -96,7 +134,7 @@ namespace MFilesSync
                 conditions[conditions.Count].TypedValue.SetValue(MFDataType.MFDatatypeDate, currentDateTime);
 
 
-                ObjectSearchResults objects = vault.ObjectSearchOperations.SearchForObjectsByConditionsEx(conditions,
+                ObjectSearchResults objects = internalVault.Vault.ObjectSearchOperations.SearchForObjectsByConditionsEx(conditions,
                     MFSearchFlags.MFSearchFlagReturnLatestVisibleVersion, false, 0);
 
                 internalDocuments.AddRange(from ObjectVersion obj in objects
@@ -130,8 +168,14 @@ namespace MFilesSync
             doc.Vault = internalDocument.VaultName;
             doc.UnNumber = internalDocument.UnNumber;
 
+            ProcessAdditionalClasses(ctx, doc, internalDocument);
             ProcessDependantDocument(ctx, doc, internalDocument);
             return doc;
+        }
+
+        private static void ProcessAdditionalClasses(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        {
+            doc.Types = ctx.Values.OfType<TypeValue>().ToList();
         }
 
         private static void ProcessDependantDocument(DocumentsContext ctx, Document doc,
@@ -145,6 +189,8 @@ namespace MFilesSync
             description.Document = doc;
             file.Document = doc;
 
+            var twoLetterLanguage = LanguageUtil.GetTwoLetterCode(internalDocument.Language);
+
 
             var mfilesDocument =
                 ctx.MFilesDocuments.FirstOrDefault(d => d.MFilesDocumentGuid == internalDocument.ObjectGuid) ??
@@ -157,17 +203,30 @@ namespace MFilesSync
             title.Value = internalDocument.GetStringValue("Name or title");
             description.Value = internalDocument.GetStringValue("Description");
 
-            title.Language = internalDocument.Language.Substring(0, 2);
-            description.Language = internalDocument.Language.Substring(0, 2);
-            file.Language = internalDocument.Language.Substring(0, 2);
+            title.Language = twoLetterLanguage;
+            description.Language = twoLetterLanguage;
+            file.Language = twoLetterLanguage;
+            
             file.Name = internalDocument.File.Title;
-            file.MimeType = internalDocument.File.Extension;
+            file.Extension = internalDocument.File.Extension;
+            file.MimeType = Mime.Lookup(file.Name + "." + file.Extension);
             file.Size = internalDocument.File.LogicalSize;
 
             doc.Titles.Add(title);
-            doc.Descriptions.Add(description);
+            if (!string.IsNullOrEmpty(description.Value))
+            {
+                doc.Descriptions.Add(description);
+            }
             doc.Files.Add(file);
+        }
 
+        private static void ProcessVaultAdditionalClasses(DocumentsContext ctx, MFilesVault vault)
+        {
+            foreach (var cls in vault.GetAddidtionalClasses())
+            {
+                var val = new TypeValue {Value = cls, Language = "en"};
+                ctx.Values.Add(val);
+            }
         }
     }
 }

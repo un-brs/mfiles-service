@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Conventions.MFiles.Models;
-using JetBrains.Annotations;
 using MFilesAPI;
 
 namespace MFilesSync
 {
     public class MFilesVault
     {
-        public string Name { get; private set; }
+        private Dictionary<string, PropertyDef> _definitions;
 
-        private Dictionary<string, PropertyDef> _definitions; 
 
         public MFilesVault(string name, IVault vault)
         {
@@ -24,10 +17,7 @@ namespace MFilesSync
             Name = name;
         }
 
-        public PropertyDef GetPropertyDef(int propertyDef)
-        {
-            return Vault.PropertyDefOperations.GetPropertyDef(propertyDef);
-        }
+        public string Name { get; private set; }
 
 
         public Dictionary<string, PropertyDef> PropertyDefinitions
@@ -48,6 +38,11 @@ namespace MFilesSync
 
         public IVault Vault { get; private set; }
 
+        public PropertyDef GetPropertyDef(int propertyDef)
+        {
+            return Vault.PropertyDefOperations.GetPropertyDef(propertyDef);
+        }
+
         public PropertyValue GetPropertyValue(ObjVer objVer, string key)
         {
             if (PropertyDefinitions.ContainsKey(key))
@@ -62,29 +57,78 @@ namespace MFilesSync
             return Vault.ObjectFileOperations.GetFiles(objVer)[1];
         }
 
-        
+        public string[] GetListValues(string key)
+        {
+            var result = new List<string>();
+            if (PropertyDefinitions.ContainsKey(key))
+            {
+                PropertyDef pdef = PropertyDefinitions[key];
+                if (pdef.ValueList > 0)
+                {
+                    ValueListItems items = Vault.ValueListItemOperations.GetValueListItems(pdef.ValueList);
+                    result.AddRange(from ValueListItem item in items select item.Name);
+                }
+            }
+            return result.ToArray();
+        }
 
 
-}
+        public string[] GetDocumentTypes()
+        {
+            return GetListValues("Additional classes");
+        }
+    }
+
+
     public class MFilesInternalDocument
     {
-        private readonly Guid _objectGuid;
-        private readonly Guid _versionGuid;
-        private string _unNumber;
-        private string _language;
-        private string _vaultName;
-        private readonly DateTime _modifiedDate;
+        private static readonly string[] ChemicalKeys =
+        {
+            "Chemical",
+            "Chemicals",
+            "All Chemicals",
+            "AIII Category",
+            "Annex III - Chemical"
+        };
+
         private readonly DateTime _createdDate;
-        private ObjectFile _file;
+        private readonly ObjectFile _file;
+        private readonly string _language;
+        private readonly DateTime _modifiedDate;
+        private readonly Guid _objectGuid;
 
 
-        private readonly ObjectVersion  _objectVersion;
-        private readonly MFilesVault _vault;
+        private readonly ObjectVersion _objectVersion;
         private readonly Dictionary<string, PropertyValue> _propertieValues;
+        private readonly string _unNumber;
+        private readonly MFilesVault _vault;
+        private readonly string _vaultName;
+        private readonly Guid _versionGuid;
         private MFilesDocument _mfilesDocument;
 
-        public IList<MFilesInternalDocument> DerivedDocuments { get; private set; }
+        public MFilesInternalDocument(MFilesVault vault, ObjectVersion objectVersion)
+        {
+            _vault = vault;
+            _objectVersion = objectVersion;
+            _propertieValues = new Dictionary<string, PropertyValue>();
 
+            _objectGuid = Guid.Parse(objectVersion.ObjectGUID);
+            _versionGuid = Guid.Parse(objectVersion.VersionGUID);
+            _vaultName = vault.Name;
+            // Fill mandatory fields
+            _unNumber = GetStringValue("UN-number");
+            _language = GetStringValue("Language");
+            // ReSharper disable once PossibleInvalidOperationException
+            _modifiedDate = GetDateTimeValue("Last modified").Value;
+            // ReSharper disable once PossibleInvalidOperationException
+            _createdDate = GetDateTimeValue("Created").Value;
+
+            _file = _vault.GetObjectFile(_objectVersion.ObjVer);
+
+            DerivedDocuments = new List<MFilesInternalDocument>();
+        }
+
+        public IList<MFilesInternalDocument> DerivedDocuments { get; private set; }
 
 
         public Guid ObjectGuid
@@ -96,6 +140,7 @@ namespace MFilesSync
         {
             get { return _versionGuid; }
         }
+
         public string UnNumber
         {
             get { return _unNumber; }
@@ -121,37 +166,32 @@ namespace MFilesSync
             get { return _createdDate; }
         }
 
-        public ObjectFile File { get { return _file; } }
-
-
-        public MFilesInternalDocument(MFilesVault vault, ObjectVersion objectVersion)
+        public ObjectFile File
         {
-            _vault = vault;
-            _objectVersion = objectVersion;
-            _propertieValues = new Dictionary<string, PropertyValue>();
-
-            _objectGuid = Guid.Parse(objectVersion.ObjectGUID);
-            _versionGuid = Guid.Parse(objectVersion.VersionGUID);
-            _vaultName = vault.Name;
-            // Fill mandatory fields
-            _unNumber = GetStringValue("UN-number");
-            _language = GetStringValue("Language");
-            // ReSharper disable once PossibleInvalidOperationException
-            _modifiedDate = GetDateTimeValue("Last modified").Value;
-            // ReSharper disable once PossibleInvalidOperationException
-            _createdDate = GetDateTimeValue("Created").Value;
-
-            _file = _vault.GetObjectFile(_objectVersion.ObjVer);
-
-            DerivedDocuments = new List<MFilesInternalDocument>();
+            get { return _file; }
         }
+
+        public MFilesDocument MFilesDocument
+        {
+            get
+            {
+                if (_mfilesDocument == null)
+                {
+                    _mfilesDocument = new MFilesDocument();
+                    _mfilesDocument.MFilesDocumentGuid = ObjectGuid;
+                    _mfilesDocument.CreatedDate = CreatedDate;
+                    _mfilesDocument.ModifiedDate = ModifiedDate;
+                }
+                return _mfilesDocument;
+            }
+        }
+
 
         private PropertyValue GetPropertyValue(string key)
         {
             if (!_propertieValues.ContainsKey(key))
             {
                 _propertieValues[key] = _vault.GetPropertyValue(_objectVersion.ObjVer, key);
-                
             }
             return _propertieValues[key];
         }
@@ -159,15 +199,16 @@ namespace MFilesSync
         public string[] GetStringValues(string key)
         {
             var result = new List<string>();
-            
-            var propertyValue = GetPropertyValue(key);
+
+            PropertyValue propertyValue = GetPropertyValue(key);
             if (null != propertyValue)
             {
-                var propertyDef = _vault.PropertyDefinitions[key];
+                PropertyDef propertyDef = _vault.PropertyDefinitions[key];
 
                 if (propertyDef.ValueList > 0)
                 {
-                    result.AddRange(from Lookup lookup in propertyValue.Value.GetValueAsLookups() select lookup.DisplayValue);
+                    result.AddRange(from Lookup lookup in propertyValue.Value.GetValueAsLookups()
+                        select lookup.DisplayValue);
                 }
                 else
                 {
@@ -186,7 +227,7 @@ namespace MFilesSync
 
         private TypedValue GetTypedValue(string key)
         {
-            var propertyValue = GetPropertyValue(key);
+            PropertyValue propertyValue = GetPropertyValue(key);
             if (null != propertyValue)
             {
                 return propertyValue.TypedValue;
@@ -196,7 +237,7 @@ namespace MFilesSync
 
         public int? GetIntegerValue(string key)
         {
-            var typedValue = GetTypedValue(key);
+            TypedValue typedValue = GetTypedValue(key);
             if (null != typedValue)
             {
                 return typedValue.Value;
@@ -206,7 +247,7 @@ namespace MFilesSync
 
         public DateTime? GetDateTimeValue(string key)
         {
-            var typedValue = GetTypedValue(key);
+            TypedValue typedValue = GetTypedValue(key);
             if (null != typedValue)
             {
                 return typedValue.Value;
@@ -214,21 +255,19 @@ namespace MFilesSync
             return null;
         }
 
-        public MFilesDocument MFilesDocument
-        {
-            get
-            {
-                if (_mfilesDocument == null)
-                {
-                    _mfilesDocument = new MFilesDocument();
-                    _mfilesDocument.MFilesDocumentGuid = ObjectGuid;
-                    _mfilesDocument.CreatedDate = CreatedDate;
-                    _mfilesDocument.ModifiedDate = ModifiedDate;
-                }
-                return _mfilesDocument;
-            }
-        }
- 
 
+        //public string[] GetChemicals()
+        //{
+        //    foreach (string key in ChemicalKeys)
+        //    {
+        //        var values = GetЫекштп(key);
+
+        //        if (values.Length > 0)
+        //        {
+        //            return values;
+        //        }
+        //    }
+        //    return new string[] {};
+        //}
     }
 }
