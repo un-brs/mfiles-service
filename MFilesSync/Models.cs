@@ -59,6 +59,14 @@ namespace MFilesSync
         public static readonly string TitleKey = "Title";
         public static readonly string PlayerKey = "Player";
         public static readonly string CopyrightKey = "Photo Credits/Source";
+        public static readonly string TransmissionDateKey = "TransmissionDate";
+        public static readonly string DateIssuanceSignatureKey = "Date Issuance-Signature";
+        public static readonly string DateOfCorrespondesKey = "Date of correspondence";
+        public static readonly string DateStartKey = "Date Start";
+        public static readonly string PublicationDateDisplayKey = "PublicationDateDisplay";
+        public static readonly string PublicationDateMonthKey = "PublicationDate-Month";
+        public static readonly string PublicationDateYearKey = "PublicationDate-Year";
+        public static readonly string PeriodBienniumKey = "Period (Biennium or Year)";
 
         private Dictionary<string, PropertyDef> _definitions;
 
@@ -317,7 +325,7 @@ namespace MFilesSync
         public DateTime? GetDateTimeValue(string key)
         {
             TypedValue typedValue = GetTypedValue(key);
-            if (null != typedValue)
+            if (null != typedValue && !typedValue.IsNULL())
             {
                 return typedValue.Value;
             }
@@ -387,6 +395,51 @@ namespace MFilesSync
         public string GetCopyright()
         {
             return GetStringValue(MFilesVault.CopyrightKey);
+        }
+
+        public DateTime? GetTransmissionDate()
+        {
+            return GetDateTimeValue(MFilesVault.TransmissionDateKey);
+        }
+
+        public DateTime? GetDateIssuanceSignature()
+        {
+            return GetDateTimeValue(MFilesVault.DateIssuanceSignatureKey);
+        }
+
+        public DateTime? GetDateOfCorrespondence()
+        {
+            return GetDateTimeValue(MFilesVault.DateOfCorrespondesKey);
+        }
+
+        public DateTime? GetDateStart()
+        {
+            return GetDateTimeValue(MFilesVault.DateStartKey);
+        }
+
+        public static readonly string PublicationDateDisplayKey = "PublicationDateDisplay";
+        public static readonly string PublicationDateMonthKey = "PublicationDate-Month";
+        public static readonly string PublicationDateYearKey = "PublicationDate-Year";
+        public static readonly string PeriodBienniumKey = "Period (Biennium or Year)";
+
+        public string GetPublicationDateDisplay()
+        {
+            return GetStringValue(MFilesVault.PublicationDateDisplayKey);
+        }
+
+        public string GetPublicationDateMonth()
+        {
+            return GetStringValue(MFilesVault.PublicationDateMonthKey);
+        }
+
+        public string GetPublicationDateYear()
+        {
+            return GetStringValue(MFilesVault.PublicationDateYearKey);
+        }
+
+        public string GetPeriodBiennium()
+        {
+            return GetStringValue(MFilesVault.PeriodBienniumKey);
         }
     }
 }

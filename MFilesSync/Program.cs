@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using Conventions.MFiles.Models;
 using MFilesAPI;
 using MFilesSync.Properties;
 using MimeSharp;
 using NLog;
+using Expression = MFilesAPI.Expression;
 
 namespace MFilesSync
 {
@@ -171,13 +173,17 @@ namespace MFilesSync
         {
             var doc = ctx.Documents.Create();
             doc.InternalDocument = internalDocument.MFilesDocument;
-            doc.PublicationDate = doc.InternalDocument.CreatedDate;
             doc.PublicationUpdateDate = doc.InternalDocument.ModifiedDate;
             doc.Vault = internalDocument.VaultName;
             doc.UnNumber = internalDocument.UnNumber;
+
+            var copyright = internalDocument.GetCopyright();
+            if (!String.IsNullOrEmpty(copyright)) { 
+                doc.Copyright = internalDocument.GetCopyright();
+            }
             
-            doc.Copyright = internalDocument.GetCopyright();
-            
+            ProcessPublicationDates(doc, internalDocument);
+            ProcessPeriods(doc, internalDocument);
             ProcessAuthorAndCountry(doc, internalDocument);
             ProcessDocumentTypes(ctx, doc, internalDocument);
             ProcessChemicals(ctx, doc, internalDocument);
@@ -190,10 +196,112 @@ namespace MFilesSync
             return doc;
         }
 
+        private static void ProcessPeriods(Document doc, MFilesInternalDocument internalDocument)
+        {
+            var period = internalDocument.GetPeriodBiennium();
+
+            if (String.IsNullOrEmpty(period))
+            {
+                return;
+            }
+            
+            var periods = period.Split('-');
+            var iperiods = new List<int>();
+            foreach(var p in periods)
+            {
+                var year = 0;
+                if (int.TryParse(p, out year))
+                {
+                    iperiods.Add(year);
+                }
+            }
+            if (iperiods.Count > 0)
+            {
+                doc.PeriodStartDate = new DateTime(iperiods[0],1,1);
+            }
+
+            if (iperiods.Count == 2)
+            {
+                doc.PeriodEndDate = new DateTime(iperiods[1], 1, 1);
+            }
+        }
+
+        private static void ProcessPublicationDates(Document doc, MFilesInternalDocument internalDocument)
+        {
+            var d = internalDocument.GetTransmissionDate();
+            if (d.HasValue)
+            {
+                doc.PublicationDate = d.Value;
+                return;
+            }
+
+            d = internalDocument.GetDateIssuanceSignature();
+            if (d.HasValue)
+            {
+                doc.PublicationDate = d.Value;
+                return;
+            }
+            d = internalDocument.GetDateOfCorrespondence();
+            if (d.HasValue)
+            {
+                doc.PublicationDate = d.Value;
+                return;
+            }
+
+            d = internalDocument.GetDateStart();
+            if (d.HasValue)
+            {
+                doc.PublicationDate = d.Value;
+                return;
+            }
+
+            var sd = internalDocument.GetPublicationDateDisplay();
+            try
+            {
+                var sdDate = DateTime.ParseExact(sd, "MMMM yyyy", CultureInfo.CurrentCulture);
+                doc.PublicationDate = sdDate;
+                return;
+            }
+            catch (FormatException)
+            {
+                
+            }
+
+            var pubMonth = internalDocument.GetPublicationDateMonth();
+            var pubYear = internalDocument.GetPublicationDateYear();
+
+            if (!(String.IsNullOrWhiteSpace(pubMonth) || String.IsNullOrWhiteSpace(pubYear)))
+            {
+                try
+                {
+                    var sdDate = DateTime.ParseExact(pubMonth + " " + pubYear, "MMMM yyyy", CultureInfo.CurrentCulture);
+                    doc.PublicationDate = sdDate;
+                    return;
+                }
+                catch (FormatException)
+                {
+
+                }
+            }
+
+            doc.PublicationDate = internalDocument.CreatedDate;
+
+        }
+
+
         private static void ProcessAuthorAndCountry(Document doc, MFilesInternalDocument internalDocument)
         {
-            doc.Author = internalDocument.GetAuthor();
+            var author = internalDocument.GetAuthor();
+            if (!String.IsNullOrEmpty(author))
+            {
+                doc.Author = internalDocument.GetAuthor();
+            }
+            
             var player = internalDocument.GetPlayer();
+            if (String.IsNullOrEmpty(player))
+            {
+                return;
+            }
 
             var country = CultureUtil.GetCountryTwoLetterCode(player);
             if (country != null)
