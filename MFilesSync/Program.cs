@@ -71,6 +71,14 @@ namespace MFilesSync
                 ctx.Values.Add(val);
             }
 
+            var meetingsQuery = from term in sctx.Terms where term.ParentTermNames.Contains("Meetings") select term;
+            foreach (var t in meetingsQuery)
+            {
+                var val = new MeetingValue { Language = "en", Value = t.Name };
+                val.ExternalTermId = t.TermId;
+                ctx.Values.Add(val);
+            }
+
         }
 
         private static void ProcessVault(DocumentsContext ctx, string vaultName, Vault vault, string viewName,
@@ -79,8 +87,8 @@ namespace MFilesSync
             Logger.Info(string.Format("Process vault {0}", vaultName));
             var internalVault = new MFilesVault(vaultName, vault);
 
-            ProcessVaultAdditionalClasses(ctx, internalVault);
-
+            ProcessVaultDocumentTypes(ctx, internalVault);
+            ctx.SaveChanges();
             foreach (IView view in vault.ViewOperations.GetViews())
             {
                 if (view.Name == viewName)
@@ -167,17 +175,81 @@ namespace MFilesSync
             doc.PublicationUpdateDate = doc.InternalDocument.ModifiedDate;
             doc.Vault = internalDocument.VaultName;
             doc.UnNumber = internalDocument.UnNumber;
-
-            ProcessAdditionalClasses(ctx, doc, internalDocument);
+            
+            doc.Copyright = internalDocument.GetCopyright();
+            
+            ProcessAuthorAndCountry(doc, internalDocument);
+            ProcessDocumentTypes(ctx, doc, internalDocument);
+            ProcessChemicals(ctx, doc, internalDocument);
+            ProcessProgrammes(ctx, doc, internalDocument);
+            ProcessTerms(ctx, doc, internalDocument);
+            ProcessMeeting(ctx, doc, internalDocument);
             ProcessDependantDocument(ctx, doc, internalDocument);
+
+
             return doc;
         }
 
-        private static void ProcessAdditionalClasses(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        private static void ProcessAuthorAndCountry(Document doc, MFilesInternalDocument internalDocument)
         {
-            doc.Types = ctx.Values.OfType<TypeValue>().ToList();
+            doc.Author = internalDocument.GetAuthor();
+            var player = internalDocument.GetPlayer();
+
+            var country = CultureUtil.GetCountryTwoLetterCode(player);
+            if (country != null)
+            {
+                doc.Country = country;
+            }
+            else if (!String.IsNullOrWhiteSpace(doc.Author))
+            {
+                doc.Author = player;
+            }
         }
 
+        private static void ProcessDocumentTypes(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        {
+            foreach (var docType in internalDocument.GetDocumentTypes())
+            {
+                doc.Types.Add(ctx.Values.OfType<TypeValue>().First(v => v.Value == docType));
+            }
+        }
+
+        private static void ProcessChemicals(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        {
+
+            ProcessListProperties(ctx, doc.Chemicals, internalDocument.GetChemicals());
+        }
+
+
+        private static void ProcessProgrammes(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        {
+
+            ProcessListProperties(ctx, doc.Programs, internalDocument.GetProgrammes());
+        }
+
+        private static void ProcessTerms(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        {
+
+            ProcessListProperties(ctx, doc.Terms, internalDocument.GetTerms());
+        }
+
+        private static void ProcessMeeting(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
+        {
+            string meeting = internalDocument.GetMeeting();
+            doc.Meeting =  ctx.Values.Where(w => w.Value == meeting).OfType<MeetingValue>().FirstOrDefault();
+        }
+
+
+        private static void ProcessListProperties<T>(DocumentsContext ctx, ICollection<T> target , IEnumerable<string> values)
+        {
+            foreach (var val in ctx.Values.Where(w => values.Contains(w.Value)).OfType<T>())
+            {
+                target.Add(val);
+            }
+        }
+
+
+        
         private static void ProcessDependantDocument(DocumentsContext ctx, Document doc,
             MFilesInternalDocument internalDocument)
         {
@@ -189,7 +261,7 @@ namespace MFilesSync
             description.Document = doc;
             file.Document = doc;
 
-            var twoLetterLanguage = LanguageUtil.GetTwoLetterCode(internalDocument.Language);
+            var twoLetterLanguage = CultureUtil.GetLangTwoLetterCode(internalDocument.Language);
 
 
             var mfilesDocument =
@@ -200,8 +272,8 @@ namespace MFilesSync
             description.MFilesDocument = mfilesDocument;
             file.MFilesDocument = mfilesDocument;
 
-            title.Value = internalDocument.GetStringValue("Name or title");
-            description.Value = internalDocument.GetStringValue("Description");
+            title.Value = internalDocument.GetTitle();
+            description.Value = internalDocument.GetDescription();
 
             title.Language = twoLetterLanguage;
             description.Language = twoLetterLanguage;
@@ -212,21 +284,35 @@ namespace MFilesSync
             file.MimeType = Mime.Lookup(file.Name + "." + file.Extension);
             file.Size = internalDocument.File.LogicalSize;
 
-            doc.Titles.Add(title);
-            if (!string.IsNullOrEmpty(description.Value))
+            if (null == doc.Titles.AsQueryable().FirstOrDefault(t => t.Language == twoLetterLanguage))
             {
-                doc.Descriptions.Add(description);
+                doc.Titles.Add(title);
+
+                if (!string.IsNullOrEmpty(description.Value))
+                {
+                    doc.Descriptions.Add(description);
+                }
             }
             doc.Files.Add(file);
         }
 
-        private static void ProcessVaultAdditionalClasses(DocumentsContext ctx, MFilesVault vault)
+        private static void ProcessVaultDocumentTypes(DocumentsContext ctx, MFilesVault vault)
         {
-            foreach (var cls in vault.GetAddidtionalClasses())
+            foreach (var cls in vault.GetDocumentTypes())
             {
-                var val = new TypeValue {Value = cls, Language = "en"};
-                ctx.Values.Add(val);
+                var docType = ctx.Values.FirstOrDefault(v => v.Value == cls);
+                if (null != docType)
+                {
+                    continue;
+                    
+                }
+                docType = new TypeValue();
+                docType.Language = "en";
+                docType.Value = cls;
+
+                ctx.Values.Add(docType);
             }
+
         }
     }
 }

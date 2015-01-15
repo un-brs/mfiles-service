@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Linq;
 
 // ReSharper disable once CheckNamespace
 
@@ -84,9 +85,7 @@ namespace Conventions.MFiles.Models
         [DefaultValue("")]
         public String Author { get; set; }
 
-        [StringLength(255)]
-        [DefaultValue("")]
-        public String Meeting { get; set; }
+        public MeetingValue Meeting { get; set; }
 
         [StringLength(255)]
         [DefaultValue("")]
@@ -240,6 +239,12 @@ namespace Conventions.MFiles.Models
 
     public class TypeValue : ListProperty
     {
+        public virtual ICollection<Document> Documents { get; set; }
+    }
+
+    public class MeetingValue : ListProperty
+    {
+        [InverseProperty("Meeting")]
         public virtual ICollection<Document> Documents { get; set; }
     }
 }

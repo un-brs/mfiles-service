@@ -78,7 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LanguageUtil.cs" />
+    <Compile Include="CultureUtil.cs" />
     <Compile Include="Models.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

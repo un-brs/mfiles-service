@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Conventions.MFiles.Models;
 using MFilesAPI;
 
@@ -8,6 +9,57 @@ namespace MFilesSync
 {
     public class MFilesVault
     {
+        public static string[] DocTypeKeys =
+        {
+            "Class",
+            "Additional classes",
+            "Class group"
+        };
+
+        public static readonly string[] ChemicalKeys =
+        {
+            "Chemical",
+            "Chemicals",
+            "All Chemicals",
+            "AIII Category",
+            "Annex III - Chemical"
+        };
+
+        public static readonly string[] MeetingKeys =
+        {
+            "Meeting Acronym",
+            "Meeting Acronym (list)"
+        };
+
+        public static readonly string[] AuthorKeys =
+        {
+            "Corporate Author",
+            "Author(s)"
+        };
+
+        public static readonly string[] ProgramKeys =
+        {
+            "Programme/Subject Matter"
+        };
+
+        public static readonly string[] TermKeys =
+        {
+            "Term-ScientificTechnicalPublications",
+            "Keyphrases",
+            "Keyword"
+        };
+
+        public static readonly string[] DescriptionKeys =
+        {
+            "Description",
+            "Short description (in English)"
+        };
+
+
+        public static readonly string TitleKey = "Title";
+        public static readonly string PlayerKey = "Player";
+        public static readonly string CopyrightKey = "Photo Credits/Source";
+
         private Dictionary<string, PropertyDef> _definitions;
 
 
@@ -47,7 +99,13 @@ namespace MFilesSync
         {
             if (PropertyDefinitions.ContainsKey(key))
             {
-                return Vault.ObjectPropertyOperations.GetProperty(objVer, PropertyDefinitions[key].ID);
+                try
+                {
+                    return Vault.ObjectPropertyOperations.GetProperty(objVer, PropertyDefinitions[key].ID);
+                }
+                catch (COMException)
+                {
+                }
             }
             return null;
         }
@@ -72,25 +130,26 @@ namespace MFilesSync
             return result.ToArray();
         }
 
+        public string[] GetListValues(string[] keys)
+        {
+            var result = new List<string>();
+            foreach (string key in keys)
+            {
+                result.AddRange(GetListValues(key));
+            }
+            return result.ToArray();
+        }
+
 
         public string[] GetDocumentTypes()
         {
-            return GetListValues("Additional classes");
+            return GetListValues(DocTypeKeys);
         }
     }
 
 
     public class MFilesInternalDocument
     {
-        private static readonly string[] ChemicalKeys =
-        {
-            "Chemical",
-            "Chemicals",
-            "All Chemicals",
-            "AIII Category",
-            "Annex III - Chemical"
-        };
-
         private readonly DateTime _createdDate;
         private readonly ObjectFile _file;
         private readonly string _language;
@@ -219,6 +278,16 @@ namespace MFilesSync
             return result.ToArray();
         }
 
+        public string[] GetStringValues(string[] keys)
+        {
+            var result = new List<string>();
+            foreach (string k in keys)
+            {
+                result.AddRange(GetStringValues(k));
+            }
+            return result.ToArray();
+        }
+
         public string GetStringValue(string key)
         {
             string[] values = GetStringValues(key);
@@ -256,18 +325,68 @@ namespace MFilesSync
         }
 
 
-        //public string[] GetChemicals()
-        //{
-        //    foreach (string key in ChemicalKeys)
-        //    {
-        //        var values = GetЫекштп(key);
+        public string[] GetChemicals()
+        {
+            return GetStringValues(MFilesVault.ChemicalKeys);
+        }
 
-        //        if (values.Length > 0)
-        //        {
-        //            return values;
-        //        }
-        //    }
-        //    return new string[] {};
-        //}
+        public string[] GetDocumentTypes()
+        {
+            return GetStringValues(MFilesVault.DocTypeKeys);
+        }
+
+        public string[] GetProgrammes()
+        {
+            return GetStringValues(MFilesVault.ProgramKeys);
+        }
+
+        public string[] GetTerms()
+        {
+            return GetStringValues(MFilesVault.TermKeys);
+        }
+
+        public string GetMeeting()
+        {
+            return GetStringValueFromKeys(MFilesVault.MeetingKeys);
+        }
+
+        private string GetStringValueFromKeys(string[] keys)
+        {
+            string[] values = GetStringValues(keys);
+            foreach (string v in values)
+            {
+                if (!String.IsNullOrEmpty(v))
+                {
+                    return v;
+                }
+            }
+            return "";
+        }
+
+        public string GetDescription()
+        {
+            return GetStringValueFromKeys(MFilesVault.DescriptionKeys);
+        }
+
+        public string GetAuthor()
+        {
+            return GetStringValueFromKeys(MFilesVault.AuthorKeys);
+        }
+
+        public string GetTitle()
+        {
+            return GetStringValue(MFilesVault.TitleKey);
+        }
+
+        public string GetPlayer()
+        {
+            return GetStringValue(MFilesVault.PlayerKey);
+        }
+
+
+        public string GetCopyright()
+        {
+            return GetStringValue(MFilesVault.CopyrightKey);
+        }
     }
 }
