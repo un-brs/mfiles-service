@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Conventions.MFiles.Models;
 using MFilesAPI;
 
-namespace MFilesSync
+namespace MFilesModel
 {
     public class MFilesVault
     {
@@ -171,8 +170,7 @@ namespace MFilesSync
         private readonly MFilesVault _vault;
         private readonly string _vaultName;
         private readonly Guid _versionGuid;
-        private MFilesDocument _mfilesDocument;
-
+ 
         public MFilesInternalDocument(MFilesVault vault, ObjectVersion objectVersion)
         {
             _vault = vault;
@@ -238,22 +236,12 @@ namespace MFilesSync
             get { return _file; }
         }
 
-        public MFilesDocument MFilesDocument
+        public string FileName
         {
-            get
-            {
-                if (_mfilesDocument == null)
-                {
-                    _mfilesDocument = new MFilesDocument();
-                    _mfilesDocument.MFilesDocumentGuid = ObjectGuid;
-                    _mfilesDocument.CreatedDate = CreatedDate;
-                    _mfilesDocument.ModifiedDate = ModifiedDate;
-                }
-                return _mfilesDocument;
-            }
+            get { return File.GetNameForFileSystem(); }
         }
 
-
+     
         private PropertyValue GetPropertyValue(string key)
         {
             if (!_propertieValues.ContainsKey(key))
@@ -437,9 +425,9 @@ namespace MFilesSync
             return GetStringValue(MFilesVault.PublicationDateYearKey);
         }
 
-        public string GetPeriodBiennium()
+        public string[] GetPeriodBiennium()
         {
-            return GetStringValue(MFilesVault.PeriodBienniumKey);
+            return GetStringValues(MFilesVault.PeriodBienniumKey);
         }
     }
 }

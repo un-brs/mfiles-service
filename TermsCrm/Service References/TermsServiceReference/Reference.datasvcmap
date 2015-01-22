@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="b93c3051-9f6f-4f79-87ba-3353c9ce0e2b" xmlns="urn:schemas-microsoft-com:xml-dataservicemap">
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="668d1ef7-e2a3-4339-977a-bdfc8bc5a646" xmlns="urn:schemas-microsoft-com:xml-dataservicemap">
   <MetadataSources>
     <MetadataSource Address="http://informea.pops.int/Meetings2/asbMeetings.svc" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="service.edmx" MetadataType="Edmx" ID="40633ed8-9e31-464d-b776-3ea7bc41f2d0" SourceId="1" SourceUrl="http://informea.pops.int/Meetings2/asbMeetings.svc" />
+    <MetadataFile FileName="service.edmx" MetadataType="Edmx" ID="80bfb129-f43a-4f01-ae20-0a7b2061f3f4" SourceId="1" SourceUrl="http://informea.pops.int/Meetings2/asbMeetings.svc" />
   </Metadata>
   <Extensions />
   <Parameters>

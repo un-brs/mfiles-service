@@ -179,11 +179,6 @@ namespace Conventions.MFiles.Models
         public Guid ExternalTermId { get; set; }
 
 
-        public int? ParentId { get; set; }
-        
-        [ForeignKey("ParentId")]
-        public ListProperty Parent { get; set; }
-
         [Required]
         [StringLength(3)]
         public String Language { get; set; }

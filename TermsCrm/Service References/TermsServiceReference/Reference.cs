@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 
 // Original file name:
-// Generation date: 14/01/2015 14:03:03
-namespace MFilesSync.TermsServiceReference
+// Generation date: 22/01/2015 21:39:09
+namespace TermsCrm.TermsServiceReference
 {
     
     /// <summary>
@@ -38,7 +38,7 @@ namespace MFilesSync.TermsServiceReference
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Services.Design", "1.0.0")]
         protected global::System.Type ResolveTypeFromName(string typeName)
         {
-            global::System.Type resolvedType = this.DefaultResolveType(typeName, "asbMeetingModel", "MFilesSync.TermsServiceReference");
+            global::System.Type resolvedType = this.DefaultResolveType(typeName, "asbMeetingModel", "TermsCrm.TermsServiceReference");
             if ((resolvedType != null))
             {
                 return resolvedType;
@@ -53,7 +53,7 @@ namespace MFilesSync.TermsServiceReference
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Services.Design", "1.0.0")]
         protected string ResolveNameFromType(global::System.Type clientType)
         {
-            if (clientType.Namespace.Equals("MFilesSync.TermsServiceReference", global::System.StringComparison.Ordinal))
+            if (clientType.Namespace.Equals("TermsCrm.TermsServiceReference", global::System.StringComparison.Ordinal))
             {
                 return string.Concat("asbMeetingModel.", clientType.Name);
             }

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using Conventions.MFiles.Models;
 using MFilesAPI;
+using MFilesModel;
 using MFilesSync.Properties;
 using MimeSharp;
 using NLog;
-using Expression = MFilesAPI.Expression;
+
+
 
 namespace MFilesSync
 {
@@ -18,11 +19,16 @@ namespace MFilesSync
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly  Mime Mime = new Mime();
 
+        private const string ErrorNotMacthedCrm = "W01";
+
         private static void Main(string[] args)
         {
             var server = new MFilesServerApplication();
-            Logger.Error(ConfigurationManager.AppSettings["MFilesHost"]);
-            MFServerConnection conn = server.Connect(MFAuthType.MFAuthTypeSpecificMFilesUser,
+            Logger.Info("Start syncronization");
+            Logger.Info(String.Format("MFiles Host:User = {0}:{1}", ConfigurationManager.AppSettings["MFilesHost"],
+                ConfigurationManager.AppSettings["MFilesUser"])
+            );
+            var conn = server.Connect(MFAuthType.MFAuthTypeSpecificMFilesUser,
                 ConfigurationManager.AppSettings["MFilesUser"],
                 ConfigurationManager.AppSettings["MFilesPassword"],
                 NetworkAddress: ConfigurationManager.AppSettings["MFilesHost"]);
@@ -32,8 +38,8 @@ namespace MFilesSync
             ctx.Database.Connection.Open();
 
             ProcessTermsService(ctx, Settings.Default.TermsServiceUri);
- 
-            foreach (string vaultName in Settings.Default.Vaults)
+
+            foreach (var vaultName in Settings.Default.Vaults)
             {
                 var svault = server.GetVaults().GetVaultByName(vaultName);
                 var vault = svault.LogIn();
@@ -42,17 +48,33 @@ namespace MFilesSync
             }
 
             ctx.SaveChanges();
+
+            Console.WriteLine();
+            Console.WriteLine("Finished. Press any key to exit ...");
+            Console.ReadKey();
+        }
+
+        private static MFilesDocument CreateMFilesDocument(MFilesInternalDocument doc)
+        {
+            var mfilesDocument = new MFilesDocument
+            {
+                MFilesDocumentGuid = doc.ObjectGuid,
+                CreatedDate = doc.CreatedDate,
+                ModifiedDate = doc.ModifiedDate
+            };
+
+            return mfilesDocument;
         }
 
         private static void ProcessTermsService(DocumentsContext ctx, string termsServiceUri)
-        {
-            var sctx = new TermsServiceReference.asbMeetingEntities(new Uri(termsServiceUri));
+        { 
             
+            var sctx = new TermsCrm.TermsServiceReference.asbMeetingEntities(new Uri(termsServiceUri));
+
             var chemicalQuery = from term in sctx.Terms where term.ParentTermNames.Contains("Chemicals") select term;
             foreach (var t in chemicalQuery)
             {
-                var val = new ChemicalValue {Language = "en", Value = t.Name};
-                val.ExternalTermId = t.TermId;
+                var val = new ChemicalValue {Language = "en", Value = t.Name, ExternalTermId = t.TermId};
                 ctx.Values.Add(val);
             }
 
@@ -150,8 +172,9 @@ namespace MFilesSync
                 internalDocuments.AddRange(from ObjectVersion obj in objects
                     select new MFilesInternalDocument(internalVault, obj));
             }
-
+            Logger.Info("Number of document to process {0}", internalDocuments.Count);
             var dict = internalDocuments.GroupBy(w => w.UnNumber).ToDictionary(g => g.Key, g => g.ToList());
+            Logger.Info("Number of UN-Numbers to process {0}", dict.Count);
             foreach (var unNumber in dict)
             {
                 var internalDocument =
@@ -164,7 +187,17 @@ namespace MFilesSync
                     ProcessDependantDocument(ctx, mainDocument, other);
                 }
                 ctx.Documents.Add(mainDocument);
-                ctx.SaveChanges();
+                try
+                {
+                    ctx.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Failed to save document " + internalDocument.FileName);
+                    Logger.Error(ex.ToString());
+                    Logger.Error(ex.StackTrace);
+                    ctx.Documents.Remove(mainDocument);
+                }
 
             }
         }
@@ -172,16 +205,19 @@ namespace MFilesSync
         private static Document ProcessMainDocument(DocumentsContext ctx, MFilesInternalDocument internalDocument)
         {
             var doc = ctx.Documents.Create();
-            doc.InternalDocument = internalDocument.MFilesDocument;
+
+            doc.InternalDocument = CreateMFilesDocument(internalDocument);
             doc.PublicationUpdateDate = doc.InternalDocument.ModifiedDate;
             doc.Vault = internalDocument.VaultName;
             doc.UnNumber = internalDocument.UnNumber;
 
             var copyright = internalDocument.GetCopyright();
-            if (!String.IsNullOrEmpty(copyright)) { 
+            if (!String.IsNullOrEmpty(copyright)) {
                 doc.Copyright = internalDocument.GetCopyright();
             }
-            
+
+  
+            ProcessDependantDocument(ctx, doc, internalDocument);
             ProcessPublicationDates(doc, internalDocument);
             ProcessPeriods(doc, internalDocument);
             ProcessAuthorAndCountry(doc, internalDocument);
@@ -190,39 +226,38 @@ namespace MFilesSync
             ProcessProgrammes(ctx, doc, internalDocument);
             ProcessTerms(ctx, doc, internalDocument);
             ProcessMeeting(ctx, doc, internalDocument);
-            ProcessDependantDocument(ctx, doc, internalDocument);
-
+  
 
             return doc;
         }
 
         private static void ProcessPeriods(Document doc, MFilesInternalDocument internalDocument)
         {
-            var period = internalDocument.GetPeriodBiennium();
+            var periods = internalDocument.GetPeriodBiennium();
 
-            if (String.IsNullOrEmpty(period))
-            {
-                return;
-            }
-            
-            var periods = period.Split('-');
             var iperiods = new List<int>();
-            foreach(var p in periods)
+            foreach (var period in periods)
             {
-                var year = 0;
-                if (int.TryParse(p, out year))
+                var startAndEnd = period.Split('-');
+                foreach (var p in startAndEnd)
                 {
-                    iperiods.Add(year);
-                }
+                    var year = 0;
+                    if (int.TryParse(p, out year))
+                    {
+                        iperiods.Add(year);
+                    }
+                }     
             }
+
+           
             if (iperiods.Count > 0)
             {
                 doc.PeriodStartDate = new DateTime(iperiods[0],1,1);
             }
 
-            if (iperiods.Count == 2)
+            if (iperiods.Count > 1)
             {
-                doc.PeriodEndDate = new DateTime(iperiods[1], 1, 1);
+                doc.PeriodEndDate = new DateTime(iperiods[iperiods.Count-1], 1, 1);
             }
         }
 
@@ -264,7 +299,7 @@ namespace MFilesSync
             }
             catch (FormatException)
             {
-                
+
             }
 
             var pubMonth = internalDocument.GetPublicationDateMonth();
@@ -296,7 +331,7 @@ namespace MFilesSync
             {
                 doc.Author = internalDocument.GetAuthor();
             }
-            
+
             var player = internalDocument.GetPlayer();
             if (String.IsNullOrEmpty(player))
             {
@@ -325,39 +360,57 @@ namespace MFilesSync
         private static void ProcessChemicals(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
         {
 
-            ProcessListProperties(ctx, doc.Chemicals, internalDocument.GetChemicals());
+            ProcessListProperties("Chemicals", internalDocument.FileName, ctx, doc.Chemicals, internalDocument.GetChemicals());
         }
 
 
         private static void ProcessProgrammes(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
         {
 
-            ProcessListProperties(ctx, doc.Programs, internalDocument.GetProgrammes());
+            ProcessListProperties("Programmes", internalDocument.FileName, ctx, doc.Programs, internalDocument.GetProgrammes());
         }
 
         private static void ProcessTerms(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
         {
 
-            ProcessListProperties(ctx, doc.Terms, internalDocument.GetTerms());
+            ProcessListProperties("Terms", internalDocument.FileName, ctx, doc.Terms, internalDocument.GetTerms());
         }
 
         private static void ProcessMeeting(DocumentsContext ctx, Document doc, MFilesInternalDocument internalDocument)
         {
             string meeting = internalDocument.GetMeeting();
+            if (String.IsNullOrEmpty(meeting))
+            {
+                return;
+            }
             doc.Meeting =  ctx.Values.Where(w => w.Value == meeting).OfType<MeetingValue>().FirstOrDefault();
+            if (doc.Meeting == null)
+            {
+                LogNotMatchedInCrm("Meeting", internalDocument.FileName, new string[]{meeting});        
+            }
         }
 
 
-        private static void ProcessListProperties<T>(DocumentsContext ctx, ICollection<T> target , IEnumerable<string> values)
+        private static void ProcessListProperties<T>(string name, string fileName, DocumentsContext ctx, ICollection<T> target, IEnumerable<string> values) where T : ListProperty
         {
             foreach (var val in ctx.Values.Where(w => values.Contains(w.Value)).OfType<T>())
             {
                 target.Add(val);
             }
+
+            LogNotMatchedInCrm(name, fileName, values.Where(w => target.All(v => v.Value != w)).ToList());
+        }
+
+        private static void LogNotMatchedInCrm(string termTitle, string fileName, ICollection<string> notMatched)
+        {
+            if (notMatched.Count != 0)
+            {
+                Logger.Warn(ErrorNotMacthedCrm + " # " + fileName + " # " + termTitle + " # not matched in CRM # " + String.Join(", ", notMatched));
+            }
         }
 
 
-        
+
         private static void ProcessDependantDocument(DocumentsContext ctx, Document doc,
             MFilesInternalDocument internalDocument)
         {
@@ -374,7 +427,10 @@ namespace MFilesSync
 
             var mfilesDocument =
                 ctx.MFilesDocuments.FirstOrDefault(d => d.MFilesDocumentGuid == internalDocument.ObjectGuid) ??
-                internalDocument.MFilesDocument;
+                (doc.InternalDocument.MFilesDocumentGuid == internalDocument.ObjectGuid
+                    ? doc.InternalDocument
+                    : CreateMFilesDocument(internalDocument)
+                );
 
             title.MFilesDocument = mfilesDocument;
             description.MFilesDocument = mfilesDocument;
@@ -386,7 +442,7 @@ namespace MFilesSync
             title.Language = twoLetterLanguage;
             description.Language = twoLetterLanguage;
             file.Language = twoLetterLanguage;
-            
+
             file.Name = internalDocument.File.Title;
             file.Extension = internalDocument.File.Extension;
             file.MimeType = Mime.Lookup(file.Name + "." + file.Extension);
@@ -412,11 +468,9 @@ namespace MFilesSync
                 if (null != docType)
                 {
                     continue;
-                    
+
                 }
-                docType = new TypeValue();
-                docType.Language = "en";
-                docType.Value = cls;
+                docType = new TypeValue {Language = "en", Value = cls};
 
                 ctx.Values.Add(docType);
             }
