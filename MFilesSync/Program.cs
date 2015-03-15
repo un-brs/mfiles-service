@@ -206,8 +206,8 @@ namespace MFilesSync
         {
             var doc = ctx.Documents.Create();
 
-            doc.InternalDocument = CreateMFilesDocument(internalDocument);
-            doc.PublicationUpdateDate = doc.InternalDocument.ModifiedDate;
+            doc.MFilesDocument = CreateMFilesDocument(internalDocument);
+            doc.PublicationUpdateDate = doc.MFilesDocument.ModifiedDate;
             doc.Vault = internalDocument.VaultName;
             doc.UnNumber = internalDocument.UnNumber;
 
@@ -427,8 +427,8 @@ namespace MFilesSync
 
             var mfilesDocument =
                 ctx.MFilesDocuments.FirstOrDefault(d => d.MFilesDocumentGuid == internalDocument.ObjectGuid) ??
-                (doc.InternalDocument.MFilesDocumentGuid == internalDocument.ObjectGuid
-                    ? doc.InternalDocument
+                (doc.MFilesDocument.MFilesDocumentGuid == internalDocument.ObjectGuid
+                    ? doc.MFilesDocument
                     : CreateMFilesDocument(internalDocument)
                 );
 
@@ -444,10 +444,21 @@ namespace MFilesSync
             file.Language = twoLetterLanguage;
 
             file.Name = internalDocument.File.Title;
-            file.Extension = internalDocument.File.Extension;
+            file.Extension = internalDocument.File.Extension.ToLower();
             file.MimeType = Mime.Lookup(file.Name + "." + file.Extension);
             file.Size = internalDocument.File.LogicalSize;
+            string urlPropertieKey = doc.Vault.Replace(" ","") + "Url";
+            if (Settings.Default.Properties[urlPropertieKey] != null)
+            {
+                file.Url = Settings.Default.Properties[urlPropertieKey].DefaultValue.ToString() + file.Name+"."+file.Extension;
+            }
+            else
+            {
+                Logger.Error("Could not find download url for " + doc.Vault);
+                file.Url = file.Name + "." + file.Extension.ToLower();
+            }
 
+ 
             if (null == doc.Titles.AsQueryable().FirstOrDefault(t => t.Language == twoLetterLanguage))
             {
                 doc.Titles.Add(title);
@@ -473,6 +484,7 @@ namespace MFilesSync
                 docType = new TypeValue {Language = "en", Value = cls};
 
                 ctx.Values.Add(docType);
+                System.GC.Collect();
             }
 
         }

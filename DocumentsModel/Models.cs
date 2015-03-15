@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
+using HarmonyInterfaces;
 
 // ReSharper disable once CheckNamespace
 
@@ -31,10 +32,10 @@ namespace Conventions.MFiles.Models
         }
     }
 
-    public class MFilesDocument
+    public class MFilesDocument : ITargetDocument
     {
         [Key]
-        public Guid MFilesDocumentGuid { get; set; }
+        public Guid Guid { get; set; }
 
         [Required]
         public DateTime CreatedDate { get; set; }
@@ -42,10 +43,15 @@ namespace Conventions.MFiles.Models
         [Required]
         public DateTime ModifiedDate { get; set; }
 
-        public virtual ICollection<Document> Documents { get; set; }
+        public virtual Document Document { get; set; }
 
         public virtual ICollection<TitleValue> Titles { get; set; } 
-        public virtual ICollection<DescriptionValue> Descriptions { get; set; } 
+        public virtual ICollection<DescriptionValue> Descriptions { get; set; }
+
+        public Guid GetGuid()
+        {
+            return Guid;
+        }
     }
 
     public class Document
@@ -62,9 +68,8 @@ namespace Conventions.MFiles.Models
             Files = new HashSet<File>();
         }
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int DocumentId { get; set; }
+        [Key, ForeignKey("MFilesDocument")]
+        public Guid MFilesDocumentGuid { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -110,8 +115,8 @@ namespace Conventions.MFiles.Models
 
         public virtual ICollection<File> Files { get; set; }
 
-        [InverseProperty("Documents")]
-        public virtual MFilesDocument InternalDocument { get; set; }
+     
+        public virtual MFilesDocument MFilesDocument { get; set; }
     }
 
 
@@ -135,6 +140,10 @@ namespace Conventions.MFiles.Models
         [Required]
         [StringLength(10)]
         public String Extension { get; set; }
+
+        [Required]
+        [StringLength(1024)]
+        public String Url { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -193,7 +202,7 @@ namespace Conventions.MFiles.Models
 
     public class TitleValue : SingleProperty
     {
-        [ForeignKey("DocumentId")]
+        [ForeignKey("MFilesDocumentGuid")]
         [InverseProperty("Titles")]
         public Document Document { get; set; }
 
@@ -205,7 +214,7 @@ namespace Conventions.MFiles.Models
 
     public class DescriptionValue : SingleProperty
     {
-        [ForeignKey("DocumentId")]
+        [ForeignKey("MFilesDocumentGuid")]
         [InverseProperty("Descriptions")]
         public Document Document { get; set; }
 
