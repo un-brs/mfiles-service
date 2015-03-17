@@ -10,9 +10,10 @@ namespace HarmonyInterfaces
     {
         bool Connect();
 
-        ITargetDocument FindDocument(Guid guid);
-        ITargetDocument FindMaster(string unNumber);
+        ITargetDocument FindDocument(ISourceDocument sourceDoc);
+        ITargetDocument FindMaster(ISourceDocument sourceDoc);
         ITargetDocument CreateMaster(ISourceDocument sourceDoc);
+        ITargetDocument CreateSlave(ITargetDocument master, ISourceDocument sourceDoc);
 
     }
 }

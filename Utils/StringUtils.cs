@@ -13,7 +13,11 @@ namespace Utils
         {
             StringBuilder sb = new StringBuilder();
             foreach (T t in collection) sb.Append(indexer(t)).Append(separator);
-            return sb.Remove(sb.Length - 1, 1).ToString();
+            if (sb.Length > 0)
+            {
+                return sb.Remove(sb.Length - 1, 1).ToString();
+            }
+            return "";
         }
     }
 }

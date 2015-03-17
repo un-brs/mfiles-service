@@ -19,16 +19,19 @@ namespace MFilesHarmony
 
         private readonly MFilesServerApplication _server;
         private readonly string[] _requestedVaults;
-        private IList<Vault> _vaults = new List<Vault>();
+        private readonly IList<Vault> _vaults = new List<Vault>();
         private readonly string _viewName;
+        private readonly DateTime _startDate;
 
-        public Source(string user, string password, string host, string[] requestedVaults, string viewName)
+        public Source(string user, string password, string host, string[] requestedVaults, string viewName,
+            DateTime startDate)
         {
             _user = user;
             _password = password;
             _host = host;
             _requestedVaults = requestedVaults;
             _viewName = viewName;
+            _startDate = startDate;
 
             _server = new MFilesServerApplication();
         }
@@ -119,7 +122,7 @@ namespace MFilesHarmony
             conditions.Add(-1, search);
 
 
-            var currentDateTime = new DateTime(2015,3,1);
+            var currentDateTime = _startDate;
 
             //var internalDocuments = new List<MFilesInternalDocument>();
 

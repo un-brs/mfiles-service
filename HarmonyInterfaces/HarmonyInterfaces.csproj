@@ -39,7 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IFile.cs" />
     <Compile Include="IHarmony.cs" />
+    <Compile Include="IListProperty.cs" />
     <Compile Include="ISource.cs" />
     <Compile Include="ISourceDocument.cs" />
     <Compile Include="IRepository.cs" />

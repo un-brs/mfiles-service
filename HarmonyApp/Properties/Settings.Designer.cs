@@ -27,6 +27,7 @@ namespace HarmonyApp.Properties {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <string>Intranet</string>
   <string>Basel</string>
   <string>Rotterdam</string>
   <string>Stockholm Production</string>
@@ -42,7 +43,7 @@ namespace HarmonyApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("AM1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Web service")]
         public string View {
             get {
                 return ((string)(this["View"]));
@@ -78,37 +79,32 @@ namespace HarmonyApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://www.basel.int/Portals/4/download.aspx?d=")]
-        public string BaselUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <string>Basel	http://www.basel.int/Portals/4/download.aspx?d=</string>
+  <string>Rotterdam	http://www.pic.int/Portals/5/download.aspx?d=</string>
+  <string>Stockholm Production	http://chm.pops.int/Portals/0/download.aspx?d=</string>
+</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection Urls {
             get {
-                return ((string)(this["BaselUrl"]));
+                return ((global::System.Collections.Specialized.StringCollection)(this["Urls"]));
             }
             set {
-                this["BaselUrl"] = value;
+                this["Urls"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://www.pic.int/Portals/5/download.aspx?d=")]
-        public string RotterdamUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
+            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
+            "tring>Basel</string>\r\n</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection VaultsTest {
             get {
-                return ((string)(this["RotterdamUrl"]));
+                return ((global::System.Collections.Specialized.StringCollection)(this["VaultsTest"]));
             }
             set {
-                this["RotterdamUrl"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://chm.pops.int/Portals/0/download.aspx?d=")]
-        public string StockholmProductionUrl {
-            get {
-                return ((string)(this["StockholmProductionUrl"]));
-            }
-            set {
-                this["StockholmProductionUrl"] = value;
+                this["VaultsTest"] = value;
             }
         }
     }

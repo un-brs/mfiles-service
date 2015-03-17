@@ -38,6 +38,9 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="MimeSharp">
+      <HintPath>..\packages\MimeSharp.1.0.0\lib\MimeSharp.dll</HintPath>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -63,6 +66,10 @@
     <ProjectReference Include="..\HarmonyInterfaces\HarmonyInterfaces.csproj">
       <Project>{a4181533-ff10-4e8c-8e87-955831e09daf}</Project>
       <Name>HarmonyInterfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{c2bb2d7b-e0eb-408a-a897-7a65fdb65a55}</Project>
+      <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

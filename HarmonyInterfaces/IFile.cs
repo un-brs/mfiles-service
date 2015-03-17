@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace HarmonyInterfaces
 {
-    public interface ITargetDocument
+    public interface IFile
     {
-        Guid Guid { get; }
-
-        DateTime ModifiedDate { get; }
-        DateTime CreatedDate { get; }
+        string Name { get; }
+        string Extension { get; }
+        long Size { get; }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DbHarmony;
+using HarmonyApp.Properties;
 using HarmonyInterfaces;
 using MFilesHarmony;
 using SimpleInjector;
@@ -20,10 +21,17 @@ namespace HarmonyApp
                 ConfigurationManager.AppSettings["MFilesUser"],
                 ConfigurationManager.AppSettings["MFilesPassword"],
                 ConfigurationManager.AppSettings["MFilesHost"],
-                new string[] { "Rotterdam", "Notexists"},
-                "AM1"
+                Settings.Default.Vaults.Cast<string>().ToArray(),
+                Settings.Default.View,
+                Settings.Default.StartDate
              ));
-            container.Register<ITarget, Target>();
+            var downloadUrls = new Dictionary<string, string>();
+            foreach (var urlPair in Settings.Default.Urls)
+            {
+                var vaultUrl = urlPair.Split('\t');
+                downloadUrls[vaultUrl[0]] = vaultUrl[1];
+            }
+            container.Register<ITarget>(() => new Target(downloadUrls));
             container.Register<IHarmony, Harmony>();
 
             var app = container.GetInstance<IHarmony>();

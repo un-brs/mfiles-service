@@ -414,8 +414,8 @@ namespace MFilesSync
         private static void ProcessDependantDocument(DocumentsContext ctx, Document doc,
             MFilesInternalDocument internalDocument)
         {
-            var title = new TitleValue();
-            var description = new DescriptionValue();
+            var title = new Title();
+            var description = new Description();
             var file = new File();
 
             title.Document = doc;

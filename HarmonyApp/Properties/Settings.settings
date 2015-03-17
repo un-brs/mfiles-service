@@ -1,17 +1,18 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MFilesSync.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HarmonyApp.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="Vaults" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Intranet&lt;/string&gt;
   &lt;string&gt;Basel&lt;/string&gt;
   &lt;string&gt;Rotterdam&lt;/string&gt;
   &lt;string&gt;Stockholm Production&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="View" Type="System.String" Scope="User">
-      <Value Profile="(Default)">AM1</Value>
+      <Value Profile="(Default)">Web service</Value>
     </Setting>
     <Setting Name="StartDate" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">2008-01-01</Value>
@@ -19,14 +20,19 @@
     <Setting Name="TermsServiceUri" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://informea.pops.int/Meetings2/asbMeetings.svc</Value>
     </Setting>
-    <Setting Name="BaselUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://www.basel.int/Portals/4/download.aspx?d=</Value>
+    <Setting Name="Urls" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Basel	http://www.basel.int/Portals/4/download.aspx?d=&lt;/string&gt;
+  &lt;string&gt;Rotterdam	http://www.pic.int/Portals/5/download.aspx?d=&lt;/string&gt;
+  &lt;string&gt;Stockholm Production	http://chm.pops.int/Portals/0/download.aspx?d=&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
     </Setting>
-    <Setting Name="RotterdamUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://www.pic.int/Portals/5/download.aspx?d=</Value>
-    </Setting>
-    <Setting Name="StockholmProductionUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://chm.pops.int/Portals/0/download.aspx?d=</Value>
+    <Setting Name="VaultsTest" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Basel&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>
 </SettingsFile>

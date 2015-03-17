@@ -24,11 +24,13 @@ namespace Conventions.MFiles.Models
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-           modelBuilder.Entity<SingleProperty>()
-               .Map<TitleValue>(m => m.Requires("Discriminator").HasValue("Title"))
-               .Map<DescriptionValue>(m => m.Requires("Discriminator").HasValue("Description"));
-           
-        
+           //modelBuilder.Entity<SingleProperty>()
+           //    .Map<Title>(m => m.Requires("Discriminator").HasValue("Title"))
+           //    .Map<Description>(m => m.Requires("Discriminator").HasValue("Description"));
+
+            //modelBuilder.Entity<MFilesDocument>().HasOptional(d => d.Title).WithRequired(t => t.MFilesDocument);
+            //modelBuilder.Entity<MFilesDocument>().HasOptional(d => d.Description).WithRequired(t => t.MFilesDocument);
+            //modelBuilder.Entity<MFilesDocument>()
         }
     }
 
@@ -45,13 +47,10 @@ namespace Conventions.MFiles.Models
 
         public virtual Document Document { get; set; }
 
-        public virtual ICollection<TitleValue> Titles { get; set; } 
-        public virtual ICollection<DescriptionValue> Descriptions { get; set; }
+        public virtual Title Title { get; set; } 
+        public virtual Description Description { get; set; }
 
-        public Guid GetGuid()
-        {
-            return Guid;
-        }
+    
     }
 
     public class Document
@@ -59,8 +58,8 @@ namespace Conventions.MFiles.Models
         public Document()
         {
             // ReSharper disable  DoNotCallOverridableMethodsInConstructor
-            Titles = new HashSet<TitleValue>();
-            Descriptions = new HashSet<DescriptionValue>();
+            Titles = new HashSet<Title>();
+            Descriptions = new HashSet<Description>();
             Chemicals = new HashSet<ChemicalValue>();
             Terms = new HashSet<TermValue>();
             Programs = new HashSet<ProgramValue>();
@@ -69,7 +68,7 @@ namespace Conventions.MFiles.Models
         }
 
         [Key, ForeignKey("MFilesDocument")]
-        public Guid MFilesDocumentGuid { get; set; }
+        public Guid DocumentId { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -81,24 +80,25 @@ namespace Conventions.MFiles.Models
         [Index(IsUnique = true)]
         public String UnNumber { get; set; }
 
-
-        [StringLength(255)]
         [DefaultValue("")]
         public String Copyright { get; set; }
 
-        [StringLength(255)]
         [DefaultValue("")]
         public String Author { get; set; }
 
         public MeetingValue Meeting { get; set; }
+        public MeetingTypeValue MeetingType { get; set; }
 
-        [StringLength(255)]
+        [StringLength(3)]
         [DefaultValue("")]
         public String Country { get; set; }
+        
+        [StringLength(255)]
+        [DefaultValue("")]
+        public String CountryFull { get; set; }
 
 
         public DateTime PublicationDate { get; set; }
-        public DateTime PublicationUpdateDate { get; set; }
 
 
         public DateTime? PeriodStartDate { get; set; }
@@ -106,8 +106,8 @@ namespace Conventions.MFiles.Models
         public DateTime? PeriodEndDate { get; set; }
 
 
-        public virtual ICollection<TitleValue> Titles { get; set; }
-        public virtual ICollection<DescriptionValue> Descriptions { get; set; }
+        public virtual ICollection<Title> Titles { get; set; }
+        public virtual ICollection<Description> Descriptions { get; set; }
         public virtual ICollection<ChemicalValue> Chemicals { get; set; }
         public virtual ICollection<TermValue> Terms { get; set; }
         public virtual ICollection<ProgramValue> Programs { get; set; }
@@ -122,9 +122,8 @@ namespace Conventions.MFiles.Models
 
     public class File
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FileId { get; set; }
+        [Key, ForeignKey("MFilesDocument")]
+        public Guid FileId { get; set; }
 
         [Required]
         public Document Document { get; set; }
@@ -132,6 +131,9 @@ namespace Conventions.MFiles.Models
         [Required]
         [StringLength(3)]
         public String Language { get; set; }
+        [Required]
+        [StringLength(255)]
+        public String LanguageFull { get; set; }
 
         [Required]
         [StringLength(512)]
@@ -152,45 +154,13 @@ namespace Conventions.MFiles.Models
         [Required]
         public long Size { get; set; }
 
-        [Required]
-        public Guid MFilesDocumentGuid { get; set; }
-        [ForeignKey("MFilesDocumentGuid")]
         public MFilesDocument MFilesDocument { get; set; }
-    }
-
-    public abstract class SingleProperty
-    {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int SinglePropertyId { get; set; }
-
-        [Required]
-        public int DocumentId { get; set; }
-
-        [Required]
-        [StringLength(3)]
-        public String Language { get; set; }
-
-        [Required(AllowEmptyStrings = true)]
-        [DefaultValue("")]
-        public String Value { get; set; }
-
-        [Required]
-        public Guid MFilesDocumentGuid { get; set; }
     }
 
     public abstract class ListProperty
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ListPropertyId { get; set; }
-
-        public Guid ExternalTermId { get; set; }
-
-
-        [Required]
-        [StringLength(3)]
-        public String Language { get; set; }
+        public Guid ListPropertyId { get; set; }
 
         [Required(AllowEmptyStrings = true)]
         [DefaultValue("")]
@@ -200,27 +170,53 @@ namespace Conventions.MFiles.Models
        
     }
 
-    public class TitleValue : SingleProperty
+    public class Title
     {
-        [ForeignKey("MFilesDocumentGuid")]
+        [Key, ForeignKey("MFilesDocument")]
+        public Guid TitleId { get; set; }
+        public MFilesDocument MFilesDocument { get; set; }
+        [Required]
         [InverseProperty("Titles")]
         public Document Document { get; set; }
 
-        [ForeignKey("MFilesDocumentGuid")]
-        [InverseProperty("Titles")]
-        public MFilesDocument MFilesDocument { get; set; }
+        [Required]
+        [StringLength(3)]
+        public String Language { get; set; }
+        
+        [Required]
+        [StringLength(255)]
+        public String LanguageFull { get; set; }
+
+        [Required(AllowEmptyStrings = true)]
+        [DefaultValue("")]
+        public String Value { get; set; }
+
     }
 
 
-    public class DescriptionValue : SingleProperty
+    public class Description
     {
-        [ForeignKey("MFilesDocumentGuid")]
+        [Key, ForeignKey("MFilesDocument")]
+        public Guid DescriptionId { get; set; }
+        public MFilesDocument MFilesDocument { get; set; }
+
+        [Required]
         [InverseProperty("Descriptions")]
         public Document Document { get; set; }
 
-        [ForeignKey("MFilesDocumentGuid")]
-        [InverseProperty("Descriptions")]
-        public MFilesDocument MFilesDocument { get; set; }
+        [Required]
+        [StringLength(3)]
+        public String Language { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        public String LanguageFull { get; set;  }
+
+        [Required(AllowEmptyStrings = true)]
+        [DefaultValue("")]
+        public String Value { get; set; }
+        
+  
     }
     
 
@@ -249,6 +245,12 @@ namespace Conventions.MFiles.Models
     public class MeetingValue : ListProperty
     {
         [InverseProperty("Meeting")]
+        public virtual ICollection<Document> Documents { get; set; }
+    }
+
+    public class MeetingTypeValue : ListProperty
+    {
+        [InverseProperty("MeetingType")]
         public virtual ICollection<Document> Documents { get; set; }
     }
 }

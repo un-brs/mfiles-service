@@ -36,8 +36,14 @@ namespace MFilesHarmony
 
         public static readonly string[] MeetingKeys =
         {
+            "CRM-Meeting",
             "Meeting Acronym",
             "Meeting Acronym (list)"
+        };
+
+        public static readonly string[] MeetingTypeKeys =
+        {
+            "CRM-Meeting-type"
         };
 
         public static readonly string[] AuthorKeys =
@@ -55,6 +61,7 @@ namespace MFilesHarmony
         {
             "Term-ScientificTechnicalPublications",
             "Keyphrases",
+            "Keywords",
             "Keyword"
         };
 
@@ -72,6 +79,7 @@ namespace MFilesHarmony
         public static readonly string CopyrightKey = "Photo Credits/Source";
         public static readonly string TransmissionDateKey = "TransmissionDate";
         public static readonly string DateIssuanceSignatureKey = "Date Issuance-Signature";
+        public static readonly string DateIssuanceKey = "Date Issuance";
         public static readonly string DateOfCorrespondesKey = "Date of correspondence";
         public static readonly string DateStartKey = "Date Start";
         public static readonly string PublicationDateDisplayKey = "PublicationDateDisplay";

@@ -41,58 +41,30 @@ namespace HarmonyApp
         private void HarmonizeVault(IRepository repository)
         {
             Logger.Info("Process vault {0}", repository.Name);
-            string newUnNumber = null;
-            IList<ISourceDocument> newDocuments = new List<ISourceDocument>();
             foreach (var sourceDoc in _source.GetDocuments(repository)) {
-                Logger.Info("Document {0}", sourceDoc.Guid);
-                var currentUnNumber = sourceDoc.UnNumber;
-                if (currentUnNumber != newUnNumber) {
-                    ProcessNewDocuments(newDocuments);
-                    newDocuments.Clear();
-                    newUnNumber = currentUnNumber;
-                }
-                var targetDoc = _target.FindDocument(sourceDoc.Guid);
-                if (targetDoc == null)
-                {
-                    var master = _target.FindMaster(currentUnNumber);
-                    if (master == null)
-                    {
-                        newUnNumber = sourceDoc.UnNumber;
-                        newDocuments.Add(sourceDoc);
-                    }
-                    else
-                    {
+  
+                var targetDoc = _target.FindDocument(sourceDoc);
+                if (targetDoc == null) {
+                    Logger.Info("Document {0}.{1}", sourceDoc.File.Name, sourceDoc.File.Extension);
+                    var master = _target.FindMaster(sourceDoc) ?? ProcessMasterDocument(sourceDoc);
+                    if (master != null) {
                         ProcessSlaveDoc(master, sourceDoc);
                     }
-                }
-                else
-                {
-                    
+                } else {
+
                 }
 
             }
         }
 
-        private void ProcessNewDocuments(IList<ISourceDocument> sourceDocuments)
-        {
-            if (sourceDocuments.Count > 0) {
-                var masterDoc = ProcessMasterDocument(sourceDocuments[0]);
-                if (masterDoc != null) {
-                    foreach (var sourceDoc in sourceDocuments) {
-                        ProcessSlaveDoc(masterDoc, sourceDoc);
-                    }
-                }
-            }
-        }
-
+ 
         private ITargetDocument ProcessMasterDocument(ISourceDocument doc)
         {
-            Logger.Info("Process master document {0}", doc.UnNumber);
             return _target.CreateMaster(doc);
         }
-        private void ProcessSlaveDoc(ITargetDocument masterDoc, ISourceDocument sourceDoc)
+        private ITargetDocument ProcessSlaveDoc(ITargetDocument masterDoc, ISourceDocument sourceDoc)
         {
-            Logger.Info("Process slave document {0}", sourceDoc.UnNumber);
+            return _target.CreateSlave(masterDoc, sourceDoc);
         }
     }
 }
