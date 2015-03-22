@@ -17,6 +17,7 @@ namespace HarmonyInterfaces
         string Author { get; }
         string Country { get; }
         string Copyright { get; }
+        string SourceUrl { get; }
         DateTime PublicationDate { get; }
 
         Tuple<DateTime, DateTime> GetPeriod();
@@ -26,15 +27,18 @@ namespace HarmonyInterfaces
         IList<IListProperty> Chemicals { get; }
         IList<IListProperty> Programs { get; }
         IList<IListProperty> Terms { get; }
+        IList<IListProperty> Tags { get; }
 
-        IListProperty Meeting { get; }
-        IListProperty MeetingType { get; }
+        IList<IListProperty> Meetings { get; }
+        IList<IListProperty> MeetingsTypes { get; }
         IRepository Repository { get; }
 
         DateTime ModifiedDate { get; }
         DateTime CreatedDate { get; }
 
         IFile File { get; }
+
+        bool CanBeSynchronized { get; }
 
     }
 }

@@ -11,10 +11,12 @@ namespace MFilesHarmony
     public class File : IFile
     {
         private ObjectFile _file;
+        private ISourceDocument _doc;
 
-        public File(ObjectFile file)
+        public File(ISourceDocument doc, ObjectFile file)
         {
             _file = file;
+            _doc = doc;
         }
         public string Name
         {
@@ -30,6 +32,15 @@ namespace MFilesHarmony
         public long Size
         {
             get { return _file.LogicalSize; }
+        }
+
+        public string GetUrl(string prefix=null)
+        {
+            if (_doc.Repository.Name == "Intranet")
+            {
+                return _doc.SourceUrl ?? "";
+            }
+            return string.Format("{0}{1}.{2}", prefix ?? "", Name, Extension);
         }
     }
 }

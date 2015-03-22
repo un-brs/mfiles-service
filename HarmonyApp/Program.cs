@@ -9,6 +9,7 @@ using HarmonyApp.Properties;
 using HarmonyInterfaces;
 using MFilesHarmony;
 using SimpleInjector;
+using TreatiesService;
 
 namespace HarmonyApp
 {
@@ -31,8 +32,12 @@ namespace HarmonyApp
                 var vaultUrl = urlPair.Split('\t');
                 downloadUrls[vaultUrl[0]] = vaultUrl[1];
             }
-            container.Register<ITarget>(() => new Target(downloadUrls));
-            container.Register<IHarmony, Harmony>();
+            container.Register<ICountries>(() => new CountriesClient(Settings.Default.TreatiesServiceUrl));
+            container.Register<ITarget>(() => new Target(downloadUrls, container.GetInstance<ICountries>()));
+            container.Register<IHarmony>(() => new Harmony(
+                container.GetInstance<ISource>(),
+                container.GetInstance<ITarget>(),
+                Settings.Default.IsDeleteUnprocessed));
 
             var app = container.GetInstance<IHarmony>();
             app.Harmonize();

@@ -19,6 +19,9 @@ namespace Conventions.MFiles.Models
 
         public DbSet<Document> Documents { get; set; }
         public DbSet<ListProperty> Values { get; set; }
+        public DbSet<Title> Titles { get; set; }
+        public DbSet<Description> Descriptions { get; set; }
+        public DbSet<File> Files { get; set; }
 
         public DbSet<MFilesDocument> MFilesDocuments { get; set; }
 
@@ -62,8 +65,11 @@ namespace Conventions.MFiles.Models
             Descriptions = new HashSet<Description>();
             Chemicals = new HashSet<ChemicalValue>();
             Terms = new HashSet<TermValue>();
+            Tags = new HashSet<TagValue>();
             Programs = new HashSet<ProgramValue>();
             Types = new HashSet<TypeValue>();
+            Meetings = new HashSet<MeetingValue>();
+            MeetingsTypes = new HashSet<MeetingTypeValue>();
             Files = new HashSet<File>();
         }
 
@@ -86,9 +92,6 @@ namespace Conventions.MFiles.Models
         [DefaultValue("")]
         public String Author { get; set; }
 
-        public MeetingValue Meeting { get; set; }
-        public MeetingTypeValue MeetingType { get; set; }
-
         [StringLength(3)]
         [DefaultValue("")]
         public String Country { get; set; }
@@ -110,8 +113,11 @@ namespace Conventions.MFiles.Models
         public virtual ICollection<Description> Descriptions { get; set; }
         public virtual ICollection<ChemicalValue> Chemicals { get; set; }
         public virtual ICollection<TermValue> Terms { get; set; }
+        public virtual ICollection<TagValue> Tags { get; set; }
         public virtual ICollection<ProgramValue> Programs { get; set; }
         public virtual ICollection<TypeValue> Types { get; set; }
+        public virtual ICollection<MeetingValue> Meetings { get; set; }
+        public virtual ICollection<MeetingTypeValue> MeetingsTypes { get; set; }
 
         public virtual ICollection<File> Files { get; set; }
 
@@ -237,6 +243,11 @@ namespace Conventions.MFiles.Models
         public virtual ICollection<Document> Documents { get; set; }
     }
 
+    public class TagValue : ListProperty
+    {
+        public virtual ICollection<Document> Documents { get; set; }
+    }
+
     public class TypeValue : ListProperty
     {
         public virtual ICollection<Document> Documents { get; set; }
@@ -244,13 +255,11 @@ namespace Conventions.MFiles.Models
 
     public class MeetingValue : ListProperty
     {
-        [InverseProperty("Meeting")]
         public virtual ICollection<Document> Documents { get; set; }
     }
 
     public class MeetingTypeValue : ListProperty
     {
-        [InverseProperty("MeetingType")]
         public virtual ICollection<Document> Documents { get; set; }
     }
 }

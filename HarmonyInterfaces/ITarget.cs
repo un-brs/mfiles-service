@@ -13,7 +13,11 @@ namespace HarmonyInterfaces
         ITargetDocument FindDocument(ISourceDocument sourceDoc);
         ITargetDocument FindMaster(ISourceDocument sourceDoc);
         ITargetDocument CreateMaster(ISourceDocument sourceDoc);
+        ITargetDocument UpdateMaster(ITargetDocument masterDoc, ISourceDocument sourceDoc);
         ITargetDocument CreateSlave(ITargetDocument master, ISourceDocument sourceDoc);
+        ITargetDocument UpdateSlave(ITargetDocument masterDoc, ITargetDocument slaveDoc, ISourceDocument sourceDoc);
+
+        void DeleteNotInList(IList<Guid> guids);
 
     }
 }

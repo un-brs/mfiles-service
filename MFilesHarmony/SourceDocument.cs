@@ -61,7 +61,7 @@ namespace MFilesHarmony
         {
             _vault = vault;
             _objVer = objVer;
-            _file = new File(_vault.MfVault.ObjectFileOperations.GetFiles(_objVer.ObjVer)[1]); 
+            _file = new File(this, _vault.MfVault.ObjectFileOperations.GetFiles(_objVer.ObjVer)[1]); 
   
             _propertieValues = new Dictionary<string, PropertyValue>();
   ;
@@ -92,6 +92,35 @@ namespace MFilesHarmony
             get
             {
                 return GetStringValue(Vault.CopyrightKey);
+            }
+        }
+
+        public string SourceUrl
+        {
+            get
+            {
+                var val = GetStringValue(Vault.SourceKey);
+                if (!String.IsNullOrWhiteSpace(val))
+                {
+                    val = val.Trim();
+                    if (Uri.IsWellFormedUriString(val, UriKind.Absolute))
+                    {
+                        return val;
+                    }
+                }
+                return null;
+            }
+        }
+
+        public bool CanBeSynchronized
+        {
+            get
+            {
+                if (Repository.Name == "Intranet")
+                {
+                    return !string.IsNullOrEmpty(SourceUrl);
+                }
+                return true;
             }
         }
 
@@ -200,14 +229,19 @@ namespace MFilesHarmony
             get { return GetListValues(Vault.TermKeys); }
         }
 
-        public IListProperty Meeting
+        public IList<IListProperty> Tags
         {
-            get { return GetListValue(Vault.MeetingKeys); }
+            get { return GetListValues(Vault.TagsKeys); }
         }
 
-        public IListProperty MeetingType
+        public IList<IListProperty> Meetings
         {
-            get { return GetListValue(Vault.MeetingTypeKeys); }
+            get { return GetListValues(Vault.MeetingKeys); }
+        }
+
+        public IList<IListProperty> MeetingsTypes
+        {
+            get { return GetListValues(Vault.MeetingTypeKeys); }
         }
 
 

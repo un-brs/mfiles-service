@@ -1,0 +1,102 @@
+﻿<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0">
+    <Schema Namespace="CountryProfiles" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+      <EntityType Name="TreatyProfile">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.String" Nullable="false" />
+        <Property Name="protocolVersion" Type="Edm.Int32" Nullable="false" />
+        <Property Name="updated" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="treaty" Type="Edm.String" Nullable="true" />
+        <Property Name="country" Type="Edm.String" Nullable="true" />
+        <Property Name="FullCountryNameEn" Type="Edm.String" Nullable="true" />
+        <Property Name="legalInstrumentName" Type="Edm.String" Nullable="true" />
+        <Property Name="legalInstrumentType" Type="Edm.String" Nullable="true" />
+        <Property Name="parentLegalInstrument" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="endorsmentDetails" Relationship="CountryProfiles.TreatyProfile_endorsmentDetails" FromRole="TreatyProfile" ToRole="endorsmentDetails" />
+      </EntityType>
+      <EntityType Name="EndorsmentDetails">
+        <Key>
+          <PropertyRef Name="endorsmentId" />
+        </Key>
+        <Property Name="endorsmentId" Type="Edm.String" Nullable="false" />
+        <Property Name="endorsmentDate" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="dateQualifier" Type="Edm.String" Nullable="true" />
+        <Property Name="declarations" Type="Edm.String" Nullable="true" />
+        <Property Name="objections" Type="Edm.String" Nullable="true" />
+        <Property Name="notes" Type="Edm.String" Nullable="true" />
+        <Property Name="hasEnteredIntoForce" Type="Edm.Boolean" Nullable="false" />
+      </EntityType>
+      <EntityType Name="TreatyInfo">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.String" Nullable="false" />
+        <Property Name="shortName" Type="Edm.String" Nullable="true" />
+        <Property Name="fullName" Type="Edm.String" Nullable="true" />
+        <Property Name="cityOfAdoption" Type="Edm.String" Nullable="true" />
+        <Property Name="dateAdoption" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="dateSignature" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="dateEntryIntoForce" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="type" Type="Edm.String" Nullable="true" />
+        <Property Name="description" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="notes" Relationship="CountryProfiles.TreatyInfo_notes" FromRole="TreatyInfo" ToRole="notes" />
+        <NavigationProperty Name="members" Relationship="CountryProfiles.TreatyInfo_members" FromRole="TreatyInfo" ToRole="members" />
+      </EntityType>
+      <EntityType Name="TreatyNote">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="treatyId" Type="Edm.String" Nullable="true" />
+        <Property Name="order" Type="Edm.Int32" Nullable="false" />
+        <Property Name="text" Type="Edm.String" Nullable="true" />
+      </EntityType>
+      <Association Name="TreatyProfile_endorsmentDetails">
+        <End Role="TreatyProfile" Type="CountryProfiles.TreatyProfile" Multiplicity="*" />
+        <End Role="endorsmentDetails" Type="CountryProfiles.EndorsmentDetails" Multiplicity="*" />
+      </Association>
+      <Association Name="TreatyInfo_notes">
+        <End Role="TreatyInfo" Type="CountryProfiles.TreatyInfo" Multiplicity="*" />
+        <End Role="notes" Type="CountryProfiles.TreatyNote" Multiplicity="*" />
+      </Association>
+      <Association Name="TreatyInfo_members">
+        <End Role="TreatyInfo" Type="CountryProfiles.TreatyInfo" Multiplicity="*" />
+        <End Role="members" Type="CountryProfiles.TreatyProfile" Multiplicity="*" />
+      </Association>
+    </Schema>
+    <Schema Namespace="brsWsCore" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+      <EntityType Name="brsCountryName">
+        <Key>
+          <PropertyRef Name="IsoCode2d" />
+        </Key>
+        <Property Name="IsoCode2d" Type="Edm.String" Nullable="false" />
+        <Property Name="NameEn" Type="Edm.String" Nullable="true" />
+        <Property Name="NameFr" Type="Edm.String" Nullable="true" />
+        <Property Name="NameEs" Type="Edm.String" Nullable="true" />
+      </EntityType>
+    </Schema>
+    <Schema Namespace="CountryProfiles.brs" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+      <EntityContainer Name="TreatyProfileContext" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="TreatyProfiles" EntityType="CountryProfiles.TreatyProfile" />
+        <EntitySet Name="EndorsmentDetails" EntityType="CountryProfiles.EndorsmentDetails" />
+        <EntitySet Name="countryNames" EntityType="brsWsCore.brsCountryName" />
+        <EntitySet Name="TreatiesInfo" EntityType="CountryProfiles.TreatyInfo" />
+        <EntitySet Name="Notes" EntityType="CountryProfiles.TreatyNote" />
+        <AssociationSet Name="TreatyProfile_endorsmentDetails" Association="CountryProfiles.TreatyProfile_endorsmentDetails">
+          <End Role="TreatyProfile" EntitySet="TreatyProfiles" />
+          <End Role="endorsmentDetails" EntitySet="EndorsmentDetails" />
+        </AssociationSet>
+        <AssociationSet Name="TreatyInfo_notes" Association="CountryProfiles.TreatyInfo_notes">
+          <End Role="TreatyInfo" EntitySet="TreatiesInfo" />
+          <End Role="notes" EntitySet="Notes" />
+        </AssociationSet>
+        <AssociationSet Name="TreatyInfo_members" Association="CountryProfiles.TreatyInfo_members">
+          <End Role="TreatyInfo" EntitySet="TreatiesInfo" />
+          <End Role="members" EntitySet="TreatyProfiles" />
+        </AssociationSet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

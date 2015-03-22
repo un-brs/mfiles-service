@@ -11,5 +11,7 @@ namespace HarmonyInterfaces
         string Name { get; }
         string Extension { get; }
         long Size { get; }
+
+        string GetUrl(string prefix);
     }
 }

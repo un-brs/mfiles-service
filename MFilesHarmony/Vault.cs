@@ -59,6 +59,11 @@ namespace MFilesHarmony
 
         public static readonly string[] TermKeys =
         {
+            "Term-ScientificTechnicalPublications"
+        };
+
+        public static readonly string[] TagsKeys =
+        {
             "Term-ScientificTechnicalPublications",
             "Keyphrases",
             "Keywords",
@@ -86,6 +91,7 @@ namespace MFilesHarmony
         public static readonly string PublicationDateMonthKey = "PublicationDate-Month";
         public static readonly string PublicationDateYearKey = "PublicationDate-Year";
         public static readonly string PeriodBienniumKey = "Period (Biennium or Year)";
+        public static readonly string SourceKey = "Source";
 
         public Vault(string name, IVault vault, IView view)
         {

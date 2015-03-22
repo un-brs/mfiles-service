@@ -103,6 +103,10 @@
       <Project>{f4576350-a9b9-496e-940e-d9ea2cb59b2d}</Project>
       <Name>MFilesHarmony</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TreatiesService\TreatiesService.csproj">
+      <Project>{3EBFCBD8-AADC-49F6-8CAF-56393A57D9E0}</Project>
+      <Name>TreatiesService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{c2bb2d7b-e0eb-408a-a897-7a65fdb65a55}</Project>
       <Name>Utils</Name>
@@ -117,8 +121,8 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>del "$(SolutionDir)\db.mdf"
-del "$(SolutionDir)\db_log.ldf"</PreBuildEvent>
+    <PreBuildEvent>REM del "$(SolutionDir)\db.mdf"
+REM del "$(SolutionDir)\db_log.ldf"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

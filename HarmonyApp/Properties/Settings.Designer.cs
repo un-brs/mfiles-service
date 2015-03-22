@@ -107,5 +107,29 @@ namespace HarmonyApp.Properties {
                 this["VaultsTest"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://informea.pops.int/CountryProfiles/brsTreatyProfile.svc")]
+        public string TreatiesServiceUrl {
+            get {
+                return ((string)(this["TreatiesServiceUrl"]));
+            }
+            set {
+                this["TreatiesServiceUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsDeleteUnprocessed {
+            get {
+                return ((bool)(this["IsDeleteUnprocessed"]));
+            }
+            set {
+                this["IsDeleteUnprocessed"] = value;
+            }
+        }
     }
 }
