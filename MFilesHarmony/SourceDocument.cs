@@ -317,7 +317,8 @@ namespace MFilesHarmony
                 {
                     result.AddRange(from Lookup lookup in propertyValue.Value.GetValueAsLookups() 
                                     where !String.IsNullOrWhiteSpace(lookup.DisplayValue)
-                                    select new ListProperty(lookup));
+                                    group lookup by lookup.DisplayValue into g
+                                    select new ListProperty(g.First()));
                 }
                 else
                 {

@@ -135,7 +135,7 @@ namespace MFilesHarmony
 
 
                 ObjectSearchResults objects = vault.MfVault.ObjectSearchOperations.SearchForObjectsByConditionsEx(conditions,
-                    MFSearchFlags.MFSearchFlagReturnLatestVisibleVersion, true, 0);
+                    MFSearchFlags.MFSearchFlagReturnLatestVisibleVersion, false, 0);
 
                 foreach (ObjectVersion objVer in objects)
                 {

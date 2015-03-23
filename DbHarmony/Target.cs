@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Entity;
 using System.Data.Entity.Core.Common.CommandTrees;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Conventions.MFiles.Models;
 using HarmonyInterfaces;
@@ -18,22 +20,30 @@ namespace DbHarmony
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly Mime Mime = new Mime();
         private readonly ICountries _countries;
-        private readonly DocumentsContext _ctx;
+        private  DocumentsContext _ctx;
         private readonly IDictionary<string, string> _repositoryUrls;
+        private readonly int _reconnectAfter;
+        private int _nDocuments = 0;
 
-        public Target(IDictionary<string, string> repositoryUrls, ICountries countries)
+        public Target(IDictionary<string, string> repositoryUrls, ICountries countries, int reconnectAfter)
         {
-            _ctx = new DocumentsContext();
+            
             _repositoryUrls = repositoryUrls;
             _countries = countries;
+            _reconnectAfter = reconnectAfter;
         }
 
         public bool Connect()
         {
+            if (_ctx != null && (_ctx.Database.Connection.State == ConnectionState.Open))
+            {
+                _ctx.Database.Connection.Close();
+            }
+            _ctx = new DocumentsContext();
             Logger.Info("Connect to database {0}", _ctx.Database.Connection.ConnectionString);
             _ctx.Database.CreateIfNotExists();
             _ctx.Database.Connection.Open();
-
+  
             return _ctx.Database.Connection.State == ConnectionState.Open;
         }
 
@@ -53,7 +63,7 @@ namespace DbHarmony
             var targetDoc = _ctx.MFilesDocuments.Create();
             _ctx.MFilesDocuments.Add(targetDoc);
 
-            var masterDoc = _ctx.Documents.Create();
+            var masterDoc = new Document();
             masterDoc.MFilesDocument = targetDoc;
             _ctx.Documents.Add(masterDoc);
 
@@ -103,7 +113,7 @@ namespace DbHarmony
                 catch (Exception ex)
                 {
                     trans.Rollback();
-                    Logger.Fatal("SQL exception {0} {1}", ex.Message, ex.InnerException.InnerException.Message);
+                    Logger.ErrorException("SQL exception {0} {1}", ex);
                     status = false;
                 }
             }
@@ -122,6 +132,7 @@ namespace DbHarmony
 
         public ITargetDocument UpdateSlave(ITargetDocument imasterDoc, ITargetDocument itargetDoc, ISourceDocument sourceDoc)
         {
+            _nDocuments++;
             var masterDoc = imasterDoc as MFilesDocument;
             var targetDoc = itargetDoc as MFilesDocument;
 
@@ -140,7 +151,7 @@ namespace DbHarmony
             Debug.Assert(doc != null);
 
             var languageCode = CultureUtils.GetLangTwoLetterCode(sourceDoc.Language);
-            // doc.Titles.Clear();
+
             var title = doc.Titles.FirstOrDefault(t => t.Language == languageCode && t.Document == doc);
             if (title == null || title.MFilesDocument == targetDoc)
             {
@@ -208,17 +219,30 @@ namespace DbHarmony
                 catch (Exception ex)
                 {
                     status = false;
-                    Logger.Fatal(ex.Message + " " + ex.InnerException);
+                    Logger.ErrorException("", ex);
                 }
             }
 
-          
+           
+
             return status ? targetDoc : null;
         }
 
-        public void DeleteNotInList(IList<Guid> guids)
+        public void OnBeforeUpdateDocument()
         {
-            var docs = (from mfdoc in _ctx.MFilesDocuments where !guids.Contains(mfdoc.Guid) select mfdoc).ToArray();
+            _nDocuments++;
+        }
+
+        public void OnAfterDocument()
+        {
+            if ((_nDocuments % _reconnectAfter) == 0) {
+                Connect();
+            }
+        }
+
+        public void DeleteNotInList(ICollection<Guid> guids)
+        {
+            var docs = (from mfdoc in _ctx.MFilesDocuments where !guids.Contains(mfdoc.Guid) select mfdoc).ToList();
             foreach (var doc in docs)
             {
                 if (doc.Title != null) {
@@ -253,6 +277,7 @@ namespace DbHarmony
                         Logger.Fatal(ex.Message + " " + ex.InnerException);
                     }
                 }
+ 
             }
         }
 

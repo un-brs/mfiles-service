@@ -10,6 +10,9 @@ namespace HarmonyInterfaces
     {
         bool Connect();
 
+        void OnBeforeUpdateDocument();
+        void OnAfterDocument();
+
         ITargetDocument FindDocument(ISourceDocument sourceDoc);
         ITargetDocument FindMaster(ISourceDocument sourceDoc);
         ITargetDocument CreateMaster(ISourceDocument sourceDoc);
@@ -17,7 +20,7 @@ namespace HarmonyInterfaces
         ITargetDocument CreateSlave(ITargetDocument master, ISourceDocument sourceDoc);
         ITargetDocument UpdateSlave(ITargetDocument masterDoc, ITargetDocument slaveDoc, ISourceDocument sourceDoc);
 
-        void DeleteNotInList(IList<Guid> guids);
+        void DeleteNotInList(ICollection<Guid> guids);
 
     }
 }

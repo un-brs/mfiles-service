@@ -64,7 +64,6 @@ namespace MFilesHarmony
 
         public static readonly string[] TagsKeys =
         {
-            "Term-ScientificTechnicalPublications",
             "Keyphrases",
             "Keywords",
             "Keyword"

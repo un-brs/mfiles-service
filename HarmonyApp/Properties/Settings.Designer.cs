@@ -131,5 +131,29 @@ namespace HarmonyApp.Properties {
                 this["IsDeleteUnprocessed"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int Interval {
+            get {
+                return ((int)(this["Interval"]));
+            }
+            set {
+                this["Interval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int DbReconnectAfter {
+            get {
+                return ((int)(this["DbReconnectAfter"]));
+            }
+            set {
+                this["DbReconnectAfter"] = value;
+            }
+        }
     }
 }

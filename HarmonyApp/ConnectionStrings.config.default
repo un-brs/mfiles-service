@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<connectionStrings>
+<add name="DocumentsContext"
+ providerName="System.Data.SqlClient"
+ connectionString="Data Source=127.0.0.1;Initial Catalog=MFILES_DOCS_DEV;Connection Timeout=60;User ID=User;Password=Password" />
+</connectionStrings>

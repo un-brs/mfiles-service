@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using HarmonyInterfaces;
 
@@ -34,6 +35,11 @@ namespace Conventions.MFiles.Models
             //modelBuilder.Entity<MFilesDocument>().HasOptional(d => d.Title).WithRequired(t => t.MFilesDocument);
             //modelBuilder.Entity<MFilesDocument>().HasOptional(d => d.Description).WithRequired(t => t.MFilesDocument);
             //modelBuilder.Entity<MFilesDocument>()
+        }
+
+        public void Detach(object entity)
+        {
+            ((IObjectContextAdapter)this).ObjectContext.Detach(entity);
         }
     }
 

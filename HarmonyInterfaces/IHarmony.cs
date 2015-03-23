@@ -9,6 +9,8 @@ namespace HarmonyInterfaces
 {
     public interface IHarmony
     {
-        void Harmonize();
+        void Process();
+        void Start();
+        void Stop();
     }
 }
