@@ -77,9 +77,15 @@ namespace HarmonyApp
                 }
                 _processed.Add(sourceDoc.Guid);
                 var targetDoc = _target.FindDocument(sourceDoc);
+                var master =  _target.FindMaster(sourceDoc);
+                if ((targetDoc != null) && (master == null))
+                {
+                    // UN-Number changed?
+                    _target.DeleteDocument(targetDoc);
+                    targetDoc = null; // Force recreation of master document
+                }
                 if (targetDoc == null) {
                     _target.OnBeforeUpdateDocument();
-                    var master = _target.FindMaster(sourceDoc);
                     if (master == null)
                     {
                         Logger.Info("Create master document {0}.{1} {2}", sourceDoc.File.Name, sourceDoc.File.Extension, sourceDoc.ModifiedDate.ToShortDateString());
@@ -97,7 +103,6 @@ namespace HarmonyApp
                 {
                     _target.OnBeforeUpdateDocument();
 
-                    var master = _target.FindMaster(sourceDoc);
                     if (master.Guid == targetDoc.Guid)
                     {
                         Logger.Info("Update master document {0}.{1}", sourceDoc.File.Name, sourceDoc.File.Extension);

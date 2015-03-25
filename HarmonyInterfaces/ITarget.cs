@@ -20,6 +20,7 @@ namespace HarmonyInterfaces
         ITargetDocument CreateSlave(ITargetDocument master, ISourceDocument sourceDoc);
         ITargetDocument UpdateSlave(ITargetDocument masterDoc, ITargetDocument slaveDoc, ISourceDocument sourceDoc);
 
+        void DeleteDocument(ITargetDocument targetDocument);
         void DeleteNotInList(ICollection<Guid> guids);
 
     }

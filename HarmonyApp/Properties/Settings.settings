@@ -31,7 +31,10 @@
     <Setting Name="VaultsTest" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Intranet&lt;/string&gt;
   &lt;string&gt;Basel&lt;/string&gt;
+  &lt;string&gt;Rotterdam&lt;/string&gt;
+  &lt;string&gt;Stockholm Production&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="TreatiesServiceUrl" Type="System.String" Scope="User">
@@ -44,7 +47,7 @@
       <Value Profile="(Default)">30</Value>
     </Setting>
     <Setting Name="DbReconnectAfter" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2</Value>
+      <Value Profile="(Default)">1000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

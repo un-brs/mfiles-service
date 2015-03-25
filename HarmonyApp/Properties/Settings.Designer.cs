@@ -96,9 +96,13 @@ namespace HarmonyApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
-            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
-            "tring>Basel</string>\r\n</ArrayOfString>")]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <string>Intranet</string>
+  <string>Basel</string>
+  <string>Rotterdam</string>
+  <string>Stockholm Production</string>
+</ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection VaultsTest {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["VaultsTest"]));
@@ -146,7 +150,7 @@ namespace HarmonyApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
         public int DbReconnectAfter {
             get {
                 return ((int)(this["DbReconnectAfter"]));

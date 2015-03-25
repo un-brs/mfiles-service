@@ -240,49 +240,55 @@ namespace DbHarmony
             }
         }
 
+        public void DeleteDocument(ITargetDocument targetDocument)
+        {
+            if (targetDocument == null)
+            {
+                return;
+            }
+            var doc = targetDocument as MFilesDocument;
+            Debug.Assert(doc != null);
+            if (doc. Title != null) {
+                Logger.Info("Delete document '{0}'", doc.Title.Value);
+            } else {
+                Logger.Info("Delete document {0}", doc.Guid);
+            }
+
+            var documents = from x in _ctx.Documents where x.MFilesDocument.Guid == doc.Guid select x;
+            _ctx.Documents.RemoveRange(documents.ToList());
+
+            var titles = from x in _ctx.Titles where x.MFilesDocument.Guid == doc.Guid select x;
+            _ctx.Titles.RemoveRange(titles.ToList());
+
+            var descriptions = (from x in _ctx.Descriptions where x.MFilesDocument.Guid == doc.Guid select x).ToList();
+            _ctx.Descriptions.RemoveRange(descriptions.ToList());
+
+            var files = (from x in _ctx.Files where x.MFilesDocument.Guid == doc.Guid select x).ToList();
+            _ctx.Files.RemoveRange(files.ToList());
+
+            _ctx.MFilesDocuments.Remove(doc);
+
+            using (var trans = _ctx.Database.BeginTransaction()) {
+                try {
+                    _ctx.SaveChanges();
+                    trans.Commit();
+                } catch (Exception ex) {
+                    Logger.ErrorException("Delete document", ex);
+                }
+            }
+        }
+
         public void DeleteNotInList(ICollection<Guid> guids)
         {
             Logger.Info("Find documents for removing...");
-            _ctx.Database.CommandTimeout= 600;
+            //_ctx.Database.CommandTimeout= 600;
             var docs = (from mfdoc in _ctx.MFilesDocuments where guids.Contains(mfdoc.Guid) select mfdoc);
             var toDelete = _ctx.MFilesDocuments.Except(docs).ToList();
-            _ctx.Database.CommandTimeout = 60;
+            //_ctx.Database.CommandTimeout = 60;
             Logger.Info("Number of files to remove = {0}", toDelete.Count);
             foreach (var doc in toDelete)
             {
-                if (doc.Title != null) {
-                    Logger.Info("Delete document '{0}'", doc.Title.Value);
-                } else {
-                    Logger.Info("Delete document {0}", doc.Guid);
-                }
-
-                var documents = from x in _ctx.Documents where x.MFilesDocument.Guid == doc.Guid select x;
-                _ctx.Documents.RemoveRange(documents.ToList());
-
-                var titles = from x in _ctx.Titles where x.MFilesDocument.Guid == doc.Guid select x;
-                _ctx.Titles.RemoveRange(titles.ToList());
-
-                var descriptions = (from x in _ctx.Descriptions where x.MFilesDocument.Guid == doc.Guid select x).ToList();
-                _ctx.Descriptions.RemoveRange(descriptions.ToList());
-
-                var files = (from x in _ctx.Files where x.MFilesDocument.Guid == doc.Guid select x).ToList();
-                _ctx.Files.RemoveRange(files.ToList());
-             
-                _ctx.MFilesDocuments.Remove(doc);
-
-                using (var trans = _ctx.Database.BeginTransaction())
-                {
-                    try
-                    {
-                        _ctx.SaveChanges();
-                        trans.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Fatal(ex.Message + " " + ex.InnerException);
-                    }
-                }
- 
+                DeleteDocument(doc);
             }
         }
 

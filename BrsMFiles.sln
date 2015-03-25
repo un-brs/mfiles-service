@@ -39,8 +39,6 @@ Project("{6141683F-8A12-4E36-9623-2EB02B2C2303}") = "HarmonyAppInstaller", "Harm
 		{D6C37B8B-F9C3-45F6-A028-94CA88431FE9} = {D6C37B8B-F9C3-45F6-A028-94CA88431FE9}
 	EndProjectSection
 EndProject
-Project("{6141683F-8A12-4E36-9623-2EB02B2C2303}") = "HarmonyAppInstaller32", "HarmonyAppInstaller32\HarmonyAppInstaller32.isproj", "{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CD_ROM|Any CPU = CD_ROM|Any CPU
@@ -160,16 +158,6 @@ Global
 		{A5154408-FBFE-45E2-B287-D09F1C55DB65}.Release|Any CPU.Build.0 = SingleImage
 		{A5154408-FBFE-45E2-B287-D09F1C55DB65}.SingleImage|Any CPU.ActiveCfg = SingleImage
 		{A5154408-FBFE-45E2-B287-D09F1C55DB65}.SingleImage|Any CPU.Build.0 = SingleImage
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.CD_ROM|Any CPU.ActiveCfg = CD_ROM
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.CD_ROM|Any CPU.Build.0 = CD_ROM
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.Debug|Any CPU.ActiveCfg = DVD-5
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.Debug|Any CPU.Build.0 = DVD-5
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.DVD-5|Any CPU.ActiveCfg = DVD-5
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.DVD-5|Any CPU.Build.0 = DVD-5
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.Release|Any CPU.ActiveCfg = SingleImage
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.Release|Any CPU.Build.0 = SingleImage
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.SingleImage|Any CPU.ActiveCfg = SingleImage
-		{5D0929F8-0DFE-4CBB-A356-410EFD4AEB5E}.SingleImage|Any CPU.Build.0 = SingleImage
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
