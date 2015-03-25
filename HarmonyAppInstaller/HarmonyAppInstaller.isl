@@ -3753,7 +3753,7 @@
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1033</td><td>The amount of RAM is not adequate for running [ProductName].</td><td>0</td><td/><td>-1180492558</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1033</td><td>The screen resolution is not adequate for running [ProductName].</td><td>0</td><td/><td>-1180492558</td></row>
 		<row><td>ID_STRING1</td><td>1033</td><td/><td>0</td><td/><td>-1180490510</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.UNEP.com</td><td>0</td><td/><td>-1180445358</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://synergies.pops.int</td><td>0</td><td/><td>-1046233042</td></row>
 		<row><td>ID_STRING3</td><td>1033</td><td>UNEP</td><td>0</td><td/><td>-1180445358</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>UNINST~1|Uninstall service</td><td>0</td><td/><td>-1180465582</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>STOPSE~1|Stop service</td><td>0</td><td/><td>-1180486030</td></row>
@@ -4002,7 +4002,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>ISTheme</td><td>InstallShield Blue.theme</td></row>
 		<row><td>ISUSLock</td><td>{AFF552A5-F448-4B6D-B63A-7D5EE85CD0B3}</td></row>
 		<row><td>ISUSSignature</td><td>{C34D2321-72B8-4139-9B9A-5A8E91F4D6E4}</td></row>
-		<row><td>ISVisitedViews</td><td>viewAssistant,viewShortcuts,viewAppFiles,viewFeatureFiles,viewXMLConfig,viewEnvironmentVariables,viewTextFiles,viewCustomActions,viewInstallScriptStd,viewBillboards,viewRegistry,viewUpgradePaths,viewTextMessages,viewRelease</td></row>
+		<row><td>ISVisitedViews</td><td>viewAssistant,viewShortcuts,viewAppFiles,viewFeatureFiles,viewXMLConfig,viewEnvironmentVariables,viewTextFiles,viewCustomActions,viewInstallScriptStd,viewBillboards,viewRegistry,viewUpgradePaths,viewTextMessages,viewRelease,viewProject,viewISToday,viewSystemSearch,viewSetupTypes</td></row>
 		<row><td>Limited</td><td>1</td></row>
 		<row><td>LockPermissionMode</td><td>1</td></row>
 		<row><td>MsiExecCmdLineOptions</td><td/></row>
@@ -4376,7 +4376,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
 		<row><td>ProductCode</td><td>{CD5B0CC4-E3EE-4D4E-AB1F-1D32D3874122}</td><td/></row>
 		<row><td>ProductName</td><td>HarmonyApp</td><td/></row>
-		<row><td>ProductVersion</td><td>1.00.0000</td><td/></row>
+		<row><td>ProductVersion</td><td>1.2.0000</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>

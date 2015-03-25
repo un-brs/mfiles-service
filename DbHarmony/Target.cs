@@ -242,8 +242,13 @@ namespace DbHarmony
 
         public void DeleteNotInList(ICollection<Guid> guids)
         {
-            var docs = (from mfdoc in _ctx.MFilesDocuments where !guids.Contains(mfdoc.Guid) select mfdoc).ToList();
-            foreach (var doc in docs)
+            Logger.Info("Find documents for removing...");
+            _ctx.Database.CommandTimeout= 600;
+            var docs = (from mfdoc in _ctx.MFilesDocuments where guids.Contains(mfdoc.Guid) select mfdoc);
+            var toDelete = _ctx.MFilesDocuments.Except(docs).ToList();
+            _ctx.Database.CommandTimeout = 60;
+            Logger.Info("Number of files to remove = {0}", toDelete.Count);
+            foreach (var doc in toDelete)
             {
                 if (doc.Title != null) {
                     Logger.Info("Delete document '{0}'", doc.Title.Value);

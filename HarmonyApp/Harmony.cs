@@ -43,12 +43,13 @@ namespace HarmonyApp
             try
             {
                 var vaults = _source.GetRepositories().ToArray();
-                Logger.Info("Process vaults {0} ", StringUtils.Concatenate(vaults, (IRepository r) => r.Name, ','));
+                Logger.Info("Process vaults: {0} ", StringUtils.Concatenate(vaults, (IRepository r) => r.Name, ','));
 
                 foreach (var vault in vaults)
                 {
                     HarmonizeVault(vault);
                 }
+                Logger.Info("Synchronization completed");
 
                 if (_isDeleteUnprocessed)
                 {
@@ -111,6 +112,7 @@ namespace HarmonyApp
                     _target.OnAfterDocument();
                 }
             }
+            Logger.Info("Finished process vault {0}", repository.Name);
  
         }
 
