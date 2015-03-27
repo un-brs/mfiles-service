@@ -70,12 +70,12 @@ namespace HarmonyApp
             Logger.Info("Process vault {0}", repository.Name);
             foreach (var sourceDoc in _source.GetDocuments(repository))
             {
+                _processed.Add(sourceDoc.Guid);
                 if (!sourceDoc.CanBeSynchronized)
                 {
                     Logger.Warn("Document {0}.{1} could not be synchronized", sourceDoc.File.Name, sourceDoc.File.Extension);
                     continue;
                 }
-                _processed.Add(sourceDoc.Guid);
                 var targetDoc = _target.FindDocument(sourceDoc);
                 var master =  _target.FindMaster(sourceDoc);
                 if ((targetDoc != null) && (master == null))
@@ -84,6 +84,22 @@ namespace HarmonyApp
                     _target.DeleteDocument(targetDoc);
                     targetDoc = null; // Force recreation of master document
                 }
+                // ===================================================================================================
+                // Special case for Basel documents
+                // ===================================================================================================
+                if ((master != null) && (sourceDoc.Repository.Name != "Basel"))
+                {
+                    if (master.GetRepositoryName() == "basel")
+                    {
+                        Logger.Warn("Skip document that exists in Basel {0}.{1}", sourceDoc.File.Name, sourceDoc.File.Extension);
+                        if (targetDoc != null)
+                        {
+                            _target.DeleteDocument(targetDoc);
+                        }
+                        continue;
+                    }
+                }
+                // ===================================================================================================
                 if (targetDoc == null) {
                     _target.OnBeforeUpdateDocument();
                     if (master == null)

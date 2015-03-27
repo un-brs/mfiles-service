@@ -12,5 +12,7 @@ namespace HarmonyInterfaces
 
         DateTime ModifiedDate { get; }
         DateTime CreatedDate { get; }
+
+        string GetRepositoryName();
     }
 }
