@@ -96,24 +96,6 @@ namespace HarmonyApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
-<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
-  <string>Intranet</string>
-  <string>Basel</string>
-  <string>Rotterdam</string>
-  <string>Stockholm Production</string>
-</ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection VaultsTest {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["VaultsTest"]));
-            }
-            set {
-                this["VaultsTest"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("http://informea.pops.int/CountryProfiles/brsTreatyProfile.svc")]
         public string TreatiesServiceUrl {
             get {
@@ -157,6 +139,22 @@ namespace HarmonyApp.Properties {
             }
             set {
                 this["DbReconnectAfter"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+  <string>Stockholm Production	stockholm</string>
+  <string>Intranet	brs</string>
+</ArrayOfString>")]
+        public global::System.Collections.Specialized.StringCollection VaultsToConventions {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["VaultsToConventions"]));
+            }
+            set {
+                this["VaultsToConventions"] = value;
             }
         }
     }

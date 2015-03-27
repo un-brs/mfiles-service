@@ -38,9 +38,13 @@ namespace HarmonyApp
             {
                 downloadUrls[vaultUrl[0]] = vaultUrl[1];
             }
+            var vaultToConvention = new Dictionary<string, string>();
+            foreach (var vc in from string vcPair in Settings.Default.VaultsToConventions select vcPair.Split('\t')) {
+                vaultToConvention[vc[0]] = vc[1];
+            }
             container.Register<ICountries>(() => new CountriesClient(Settings.Default.TreatiesServiceUrl));
-            container.Register<ITarget>(() => new Target(downloadUrls, container.GetInstance<ICountries>(),
-                Settings.Default.DbReconnectAfter));
+            container.Register<ITarget>(() => new Target(downloadUrls, vaultToConvention,
+                container.GetInstance<ICountries>(), Settings.Default.DbReconnectAfter));
             container.Register<IHarmony>(() => new Harmony(
                 container.GetInstance<ISource>(),
                 container.GetInstance<ITarget>(),

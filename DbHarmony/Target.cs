@@ -22,15 +22,18 @@ namespace DbHarmony
         private readonly ICountries _countries;
         private  DocumentsContext _ctx;
         private readonly IDictionary<string, string> _repositoryUrls;
+        private readonly IDictionary<string, string> _vaultToConvention;
         private readonly int _reconnectAfter;
         private int _nDocuments = 0;
 
-        public Target(IDictionary<string, string> repositoryUrls, ICountries countries, int reconnectAfter)
+        public Target(IDictionary<string, string> repositoryUrls, IDictionary<string, string> vaultToConvention, 
+            ICountries countries, int reconnectAfter)
         {
             
             _repositoryUrls = repositoryUrls;
             _countries = countries;
             _reconnectAfter = reconnectAfter;
+            _vaultToConvention = vaultToConvention;
         }
 
         public bool Connect()
@@ -81,7 +84,7 @@ namespace DbHarmony
             var masterDoc = targetDoc.Document;
             masterDoc.MFilesDocument = targetDoc;
             masterDoc.UnNumber = string.IsNullOrEmpty(sourceDoc.UnNumber) ? sourceDoc.Name : sourceDoc.UnNumber;
-            masterDoc.Vault = sourceDoc.Repository.Name;
+            masterDoc.Convention = GetConventionName(sourceDoc.Repository.Name);
             masterDoc.Author = sourceDoc.Author;
             masterDoc.CountryFull = sourceDoc.Country;
             masterDoc.Country = _countries.GetCountryIsoCode2(masterDoc.CountryFull);
@@ -228,6 +231,7 @@ namespace DbHarmony
             return status ? targetDoc : null;
         }
 
+
         public void OnBeforeUpdateDocument()
         {
             _nDocuments++;
@@ -248,7 +252,7 @@ namespace DbHarmony
             }
             var doc = targetDocument as MFilesDocument;
             Debug.Assert(doc != null);
-            if (doc. Title != null) {
+            if (doc.Title != null) {
                 Logger.Info("Delete document '{0}'", doc.Title.Value);
             } else {
                 Logger.Info("Delete document {0}", doc.Guid);
@@ -273,6 +277,7 @@ namespace DbHarmony
                     _ctx.SaveChanges();
                     trans.Commit();
                 } catch (Exception ex) {
+                    trans.Rollback();
                     Logger.ErrorException("Delete document", ex);
                 }
             }
@@ -434,6 +439,13 @@ namespace DbHarmony
                 }
                 masterDoc.Types.Add(targetType);
             }
+        }
+
+        private string GetConventionName(string repositoryName)
+        {
+            return _vaultToConvention.ContainsKey(repositoryName) 
+                ? _vaultToConvention[repositoryName] 
+                : repositoryName.ToLower();
         }
     }
 }

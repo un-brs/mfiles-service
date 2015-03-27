@@ -28,15 +28,6 @@
   &lt;string&gt;Stockholm Production	http://chm.pops.int/Portals/0/download.aspx?d=&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
-    <Setting Name="VaultsTest" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;string&gt;Intranet&lt;/string&gt;
-  &lt;string&gt;Basel&lt;/string&gt;
-  &lt;string&gt;Rotterdam&lt;/string&gt;
-  &lt;string&gt;Stockholm Production&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
-    </Setting>
     <Setting Name="TreatiesServiceUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://informea.pops.int/CountryProfiles/brsTreatyProfile.svc</Value>
     </Setting>
@@ -48,6 +39,13 @@
     </Setting>
     <Setting Name="DbReconnectAfter" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1000</Value>
+    </Setting>
+    <Setting Name="VaultsToConventions" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Stockholm Production	stockholm&lt;/string&gt;
+  &lt;string&gt;Intranet	brs&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>
 </SettingsFile>

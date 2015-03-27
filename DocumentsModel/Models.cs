@@ -51,6 +51,7 @@ namespace Conventions.MFiles.Models
         [Required]
         public DateTime CreatedDate { get; set; }
 
+  
         [Required]
         public DateTime ModifiedDate { get; set; }
 
@@ -58,6 +59,14 @@ namespace Conventions.MFiles.Models
 
         public virtual Title Title { get; set; } 
         public virtual Description Description { get; set; }
+
+        public string GetRepositoryName()
+        {
+            if (Document != null) {
+                return Document.Convention;
+            }
+            return null;
+        }
 
     
     }
@@ -85,7 +94,7 @@ namespace Conventions.MFiles.Models
         [Required]
         [StringLength(255)]
         [DefaultValue("")]
-        public String Vault { get; set; }
+        public String Convention { get; set; }
 
         [Required]
         [StringLength(255)]
