@@ -11,6 +11,7 @@ using System.Data.Services.Providers;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Web;
+using System.Web.Configuration;
 using Conventions.MFiles.Models;
 
 namespace MFilesService
@@ -21,12 +22,13 @@ namespace MFilesService
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config)
         {
-            // TODO: set rules to indicate which entity sets and service operations are visible, updatable, etc.
-            // Examples:
             config.SetEntitySetAccessRule("*", EntitySetRights.AllRead);
             config.SetServiceOperationAccessRule("*", ServiceOperationRights.AllRead);
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V3;
             config.UseVerboseErrors = true;
+            config.SetEntitySetPageSize("*", 
+                Convert.ToInt32(WebConfigurationManager.AppSettings["AllEntitiesPageSize"])
+            );
         }
     }
 }
