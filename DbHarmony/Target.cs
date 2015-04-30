@@ -61,6 +61,13 @@ namespace DbHarmony
             return _ctx.MFilesDocuments.FirstOrDefault(x => x.Document.UnNumber == unNumber);
         }
 
+        public ITargetDocument FindMasterById(Guid guid)
+        {
+            var file = _ctx.Files.FirstOrDefault(f => f.FileId == guid);
+            return file == null ? null : file.Document.MFilesDocument;
+        }
+
+
         public ITargetDocument CreateMaster(ISourceDocument sourceDoc)
         {
             var targetDoc = _ctx.MFilesDocuments.Create();
@@ -116,7 +123,7 @@ namespace DbHarmony
                 catch (Exception ex)
                 {
                     trans.Rollback();
-                    Logger.ErrorException("SQL exception {0} {1}", ex);
+                    Logger.ErrorException("SQL exception", ex);
                     status = false;
                 }
             }
@@ -195,7 +202,7 @@ namespace DbHarmony
             {
                 repositoryUrl = _repositoryUrls[sourceDoc.Repository.Name];
             }
-            var targetFile = doc.Files.FirstOrDefault(f => f.MFilesDocument == targetDoc);
+            var targetFile = _ctx.Files.FirstOrDefault(f => f.FileId == targetDoc.Guid);
             if (targetFile == null)
             {
                 targetFile = new File();
@@ -222,6 +229,7 @@ namespace DbHarmony
                 catch (Exception ex)
                 {
                     status = false;
+                    trans.Rollback();
                     Logger.ErrorException("", ex);
                 }
             }
@@ -258,16 +266,16 @@ namespace DbHarmony
                 Logger.Info("Delete document {0}", doc.Guid);
             }
 
-            var documents = from x in _ctx.Documents where x.MFilesDocument.Guid == doc.Guid select x;
+            var documents = from x in _ctx.Documents where x.DocumentId == doc.Guid select x;
             _ctx.Documents.RemoveRange(documents.ToList());
 
-            var titles = from x in _ctx.Titles where x.MFilesDocument.Guid == doc.Guid select x;
+            var titles = from x in _ctx.Titles where x.TitleId == doc.Guid select x;
             _ctx.Titles.RemoveRange(titles.ToList());
 
-            var descriptions = (from x in _ctx.Descriptions where x.MFilesDocument.Guid == doc.Guid select x).ToList();
+            var descriptions = (from x in _ctx.Descriptions where x.DescriptionId == doc.Guid select x).ToList();
             _ctx.Descriptions.RemoveRange(descriptions.ToList());
 
-            var files = (from x in _ctx.Files where x.MFilesDocument.Guid == doc.Guid select x).ToList();
+            var files = (from x in _ctx.Files where x.FileId == doc.Guid select x).ToList();
             _ctx.Files.RemoveRange(files.ToList());
 
             _ctx.MFilesDocuments.Remove(doc);

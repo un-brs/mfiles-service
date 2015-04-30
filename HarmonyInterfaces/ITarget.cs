@@ -15,6 +15,7 @@ namespace HarmonyInterfaces
 
         ITargetDocument FindDocument(ISourceDocument sourceDoc);
         ITargetDocument FindMaster(ISourceDocument sourceDoc);
+        ITargetDocument FindMasterById(Guid guid);
         ITargetDocument CreateMaster(ISourceDocument sourceDoc);
         ITargetDocument UpdateMaster(ITargetDocument masterDoc, ISourceDocument sourceDoc);
         ITargetDocument CreateSlave(ITargetDocument master, ISourceDocument sourceDoc);

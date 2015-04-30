@@ -78,7 +78,10 @@ namespace HarmonyApp
                 }
                 var targetDoc = _target.FindDocument(sourceDoc);
                 var master =  _target.FindMaster(sourceDoc);
-                if ((targetDoc != null) && (master == null))
+                var masterById =  _target.FindMasterById(sourceDoc.Guid);
+
+
+                if ((targetDoc != null) && (master == null || (masterById != null && (master.Guid != masterById.Guid))))
                 {
                     // UN-Number changed?
                     _target.DeleteDocument(targetDoc);

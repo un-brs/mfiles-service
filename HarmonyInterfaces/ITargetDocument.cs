@@ -9,7 +9,7 @@ namespace HarmonyInterfaces
     public interface ITargetDocument
     {
         Guid Guid { get; }
-
+ 
         DateTime ModifiedDate { get; }
         DateTime CreatedDate { get; }
 

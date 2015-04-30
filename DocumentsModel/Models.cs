@@ -147,7 +147,7 @@ namespace Conventions.MFiles.Models
         public Guid FileId { get; set; }
 
         [Required]
-        public Document Document { get; set; }
+        public virtual Document Document { get; set; }
 
         [Required]
         [StringLength(3)]
@@ -175,7 +175,7 @@ namespace Conventions.MFiles.Models
         [Required]
         public long Size { get; set; }
 
-        public MFilesDocument MFilesDocument { get; set; }
+        public virtual MFilesDocument MFilesDocument { get; set; }
     }
 
     public abstract class ListProperty
